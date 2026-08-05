@@ -1088,12 +1088,47 @@
     document.addEventListener("DOMContentLoaded", () => {
         const monthlyBtn = document.querySelector(".monthly-label");
         const yearlyBtn = document.querySelector(".yearly-label");
+        const byokBtn = document.querySelector(".byok-label");
+        const hostedBtn = document.querySelector(".hosted-label");
         const prices = document.querySelectorAll(".price");
 
         // Only run if the page has the pricing elements
         if (!monthlyBtn || !yearlyBtn || prices.length === 0) return;
 
+        // Billing mode: BYOK (bring your own AI key) or Hosted (WireMark runs inference).
+        let currentMode = "byok";
         let isAnimating = false;
+
+        function setModeNote() {
+            const note = document.getElementById("billingModeNote");
+            if (note) {
+                note.textContent = currentMode === "byok"
+                    ? "BYOK — connect your own AI key; inference usage is billed to you."
+                    : "Hosted — WireMark manages inference; the plan price covers compute.";
+            }
+        }
+
+        function setModeFeatures() {
+            document.querySelectorAll("[data-byok-text]").forEach(el => {
+                el.textContent = currentMode === "byok"
+                    ? el.getAttribute("data-byok-text")
+                    : el.getAttribute("data-hosted-text");
+            });
+        }
+
+        function renderPrice(price, type) {
+            // Prefer mode-scoped values (BYOK/Hosted), then fall back to plain monthly/yearly.
+            const suffix = type.charAt(0).toUpperCase() + type.slice(1);
+            let value = price.dataset[currentMode + suffix + "Value"];
+            let sub = price.dataset[currentMode + suffix + "Sub"];
+            if (value === undefined) {
+                value = price.dataset[type + "Value"];
+                sub = price.dataset[type + "Sub"];
+            }
+            if (value === undefined) return;
+            sub = sub || (type === "monthly" ? "/mo" : "/mo billed annually");
+            price.innerHTML = `$${value}<sub>${sub}</sub>`;
+        }
 
         function changePrice(type) {
             if (isAnimating) return; // Prevent double click bug
@@ -1103,10 +1138,7 @@
                 price.classList.add("fade-out");
 
                 setTimeout(() => {
-                    const value = price.dataset[type + "Value"];
-                    const sub = price.dataset[type + "Sub"] || (type === "monthly" ? "/mo" : "/mo billed annually");
-
-                    price.innerHTML = `$${value}<sub>${sub}</sub>`;
+                    renderPrice(price, type);
 
                     price.classList.remove("fade-out");
                     price.classList.add("fade-in");
@@ -1116,6 +1148,30 @@
                         isAnimating = false;
                     }, 300);
                 }, 300);
+            });
+        }
+
+        function setMode(mode) {
+            currentMode = mode;
+            if (mode === "byok") {
+                byokBtn.classList.add("active");
+                hostedBtn.classList.remove("active");
+            } else {
+                hostedBtn.classList.add("active");
+                byokBtn.classList.remove("active");
+            }
+            setModeNote();
+            setModeFeatures();
+            const cycle = monthlyBtn.classList.contains("active") ? "monthly" : "yearly";
+            changePrice(cycle);
+        }
+
+        if (byokBtn && hostedBtn) {
+            byokBtn.addEventListener("click", function () {
+                if (currentMode !== "byok") setMode("byok");
+            });
+            hostedBtn.addEventListener("click", function () {
+                if (currentMode !== "hosted") setMode("hosted");
             });
         }
 

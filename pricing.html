@@ -7,7 +7,7 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="author" content="WireMark">
-        <meta name="description" content="WireMark pricing — start free on the Starter plan, then upgrade to Pro or Team as your work grows. Wire it, mark it, ship it over the live canvas.">
+        <meta name="description" content="WireMark pricing — BYOK or Hosted billing. Start free on Starter, upgrade to Pro or Team as your work grows. Wire it, mark it, ship it over the live canvas.">
         <!-- ======== Page title ============ -->
         <title>WireMark — Pricing: Starter, Pro, Team, Enterprise</title>
         <!--<< Favcion >>-->
@@ -30,13 +30,13 @@
     <link rel="canonical" href="https://wiremark.net/pricing.html">
     <meta property="og:site_name" content="WireMark">
     <meta property="og:title" content="WireMark — Pricing: Starter, Pro, Team, Enterprise">
-    <meta property="og:description" content="WireMark pricing — start free on the Starter plan, then upgrade to Pro or Team as your work grows. Wire it, mark it, ship it over the live canvas.">
+    <meta property="og:description" content="WireMark pricing — BYOK or Hosted billing. Start free on Starter, upgrade to Pro or Team as your work grows. Wire it, mark it, ship it over the live canvas.">
     <meta property="og:url" content="https://wiremark.net/pricing.html">
     <meta property="og:type" content="website">
     <meta property="og:image" content="https://wiremark.net/assets/img/home-1/hero-bg.jpg">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="WireMark — Pricing: Starter, Pro, Team, Enterprise">
-    <meta name="twitter:description" content="WireMark pricing — start free on the Starter plan, then upgrade to Pro or Team as your work grows. Wire it, mark it, ship it over the live canvas.">
+    <meta name="twitter:description" content="WireMark pricing — BYOK or Hosted billing. Start free on Starter, upgrade to Pro or Team as your work grows. Wire it, mark it, ship it over the live canvas.">
     <meta name="twitter:image" content="https://wiremark.net/assets/img/home-1/hero-bg.jpg">
     <script type="application/ld+json">
 {
@@ -208,7 +208,7 @@
                                 <div class="contact-details">
                                     <span class="sub-info">Email</span>
                                     <p>
-                                        <a href="mailto:hello@wiremark.net">hello@wiremark.net</a>
+                                        <a href="mailto:info@wiremark.net">info@wiremark.net</a>
                                     </p>
                                 </div>
                             </div>
@@ -217,7 +217,7 @@
                                     Get in touch:
                                 </span>
                                 <div class="social-icon d-flex align-items-center">
-                                    <a href="mailto:hello@wiremark.net" aria-label="Email WireMark"><i class="fa-solid fa-envelope"></i></a>
+                                    <a href="mailto:info@wiremark.net" aria-label="Email WireMark"><i class="fa-solid fa-envelope"></i></a>
                                 </div>
                             </div>
                         </div>
@@ -271,10 +271,18 @@
                                 <p class="mt-3 d-none">
                                     Start free on Starter. Upgrade when your team is ready.
                                 </p>
+                                <div class="pricing-toggle-wrapper text-center mt-0 mb-2">
+                                    <span class="toggle-label byok-label active">BYOK</span>
+                                    <span class="toggle-label hosted-label">Hosted</span>
+                                </div>
+                                <p class="mode-note" id="billingModeNote">BYOK — connect your own AI key; inference usage is billed to you.</p>
                                 <div class="pricing-toggle-wrapper text-center mt-0">
                                     <span class="toggle-label monthly-label active">Monthly</span>
                                     <span class="toggle-label yearly-label">Annual</span>
                                 </div>
+                                <p class="pricing-explainer mx-auto mt-4" style="max-width: 700px;">
+                                    AI-assisted markup runs real model inference, so how you pay for it is a choice. BYOK keeps inference on your own account and your plan price lean. Hosted bundles inference into the plan so WireMark manages it for you.
+                                </p>
                             </div>
                             <div class="row">
                                 <div class="col-xl-3 col-lg-6 col-md-6 wow animate__fadeInUp" data-wow-delay=".3s">
@@ -330,7 +338,7 @@
                                             <p class="price-text">
                                                 For builders who want the full observe-to-verify loop.
                                             </p>
-                                            <h3 class="price" data-monthly-value="19" data-monthly-sub="/mo" data-yearly-value="15" data-yearly-sub="/mo billed annually">$19<sub>/mo</sub></h3>
+                                            <h3 class="price" data-monthly-value="19" data-monthly-sub="/mo" data-yearly-value="15" data-yearly-sub="/mo billed annually" data-byok-monthly-value="19" data-byok-monthly-sub="/mo" data-byok-yearly-value="15" data-byok-yearly-sub="/mo billed annually" data-hosted-monthly-value="49" data-hosted-monthly-sub="/mo" data-hosted-yearly-value="39" data-hosted-yearly-sub="/mo billed annually">$19<sub>/mo</sub></h3>
                                         </div>
                                         <a class="theme-btn" href="contact.html">
                                             Get started
@@ -351,11 +359,11 @@
                                                 </li>
                                                 <li>
                                                     <img src="assets/img/home-1/check.png" alt="">
-                                                    AI-assisted markup &amp; intent capture
+                                                    <span data-byok-text="AI-assisted markup &amp; intent capture with your own key" data-hosted-text="AI-assisted markup &amp; intent capture, inference included">AI-assisted markup &amp; intent capture with your own key</span>
                                                 </li>
                                                 <li>
                                                     <img src="assets/img/home-1/check.png" alt="">
-                                                  Ranked source candidates
+                                                    <span data-byok-text="Ranked source candidates from your own key" data-hosted-text="Ranked source candidates, inference included">Ranked source candidates from your own key</span>
                                                 </li>
                                                 <li>
                                                     <img src="assets/img/home-1/check.png" alt="">
@@ -376,7 +384,7 @@
                                             <p class="price-text">
                                                 For teams collaborating on one shared visual loop.
                                             </p>
-                                            <h3 class="price" data-monthly-value="39" data-monthly-sub="/user/mo" data-yearly-value="32" data-yearly-sub="/user/mo billed annually">$39<sub>/user/mo</sub></h3>
+                                            <h3 class="price" data-monthly-value="39" data-monthly-sub="/user/mo" data-yearly-value="32" data-yearly-sub="/user/mo billed annually" data-byok-monthly-value="39" data-byok-monthly-sub="/user/mo" data-byok-yearly-value="32" data-byok-yearly-sub="/user/mo billed annually" data-hosted-monthly-value="99" data-hosted-monthly-sub="/user/mo" data-hosted-yearly-value="79" data-hosted-yearly-sub="/user/mo billed annually">$39<sub>/user/mo</sub></h3>
                                         </div>
                                         <a class="theme-btn" href="contact.html">
                                             Get started
@@ -499,7 +507,7 @@
                                                         WireMark is a visual-first product environment. Wire it, mark it, and ship it over the live canvas.
                                                     </p>
                                                     <div class="social-icon d-flex align-items-center">
-                                                        <a href="mailto:hello@wiremark.net" aria-label="Email WireMark"><i class="fa-solid fa-envelope"></i></a>
+                                                        <a href="mailto:info@wiremark.net" aria-label="Email WireMark"><i class="fa-solid fa-envelope"></i></a>
                                                     </div>
                                                 </div>
                                             </div>
@@ -593,7 +601,7 @@
                                                     </li>
                                                     <li>
                                                         <img src="assets/img/home-1/email.png" alt="">
-                                                        <a href="mailto:hello@wiremark.net">hello@wiremark.net</a>
+                                                        <a href="mailto:info@wiremark.net">info@wiremark.net</a>
                                                     </li>
                                                     <li>
                                                         General information or new <br> business inquiries.
