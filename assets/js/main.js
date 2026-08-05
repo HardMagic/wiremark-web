@@ -1104,12 +1104,22 @@
             if (note) {
                 note.textContent = currentMode === "byok"
                     ? "BYOK — connect your own AI key; inference usage is billed to you."
-                    : "Hosted — WireMark manages inference; the plan price covers compute.";
+                    : "Hosted — WireMark manages inference; every plan includes a monthly AI-credit allowance.";
             }
         }
 
         function setModeFeatures() {
             document.querySelectorAll("[data-byok-text]").forEach(el => {
+                if (el.classList.contains("credit-line")) {
+                    // Credit-allowance lines appear only in Hosted mode.
+                    if (currentMode === "hosted") {
+                        el.style.display = "";
+                        el.textContent = el.getAttribute("data-hosted-text");
+                    } else {
+                        el.style.display = "none";
+                    }
+                    return;
+                }
                 el.textContent = currentMode === "byok"
                     ? el.getAttribute("data-byok-text")
                     : el.getAttribute("data-hosted-text");
@@ -1165,6 +1175,10 @@
             const cycle = monthlyBtn.classList.contains("active") ? "monthly" : "yearly";
             changePrice(cycle);
         }
+
+        // Normalize initial state (BYOK default): swap feature text and hide credit lines.
+        setModeNote();
+        setModeFeatures();
 
         if (byokBtn && hostedBtn) {
             byokBtn.addEventListener("click", function () {
