@@ -4,7 +4,7 @@
     "number": 1,
     "redirect": null,
     "title": "WireMark — Page Not Found on the Live Canvas",
-    "captureUrl": "http://127.0.0.1:5502/404.html",
+    "captureUrl": "http://127.0.0.1:5503/404.html",
     "image": "shots/01-404.jpg",
     "ok": true,
     "url": "https://wiremark.net/404.html"
@@ -14,7 +14,7 @@
     "number": 2,
     "redirect": null,
     "title": "About WireMark — Wire It. Mark It. Ship It.",
-    "captureUrl": "http://127.0.0.1:5502/about.html",
+    "captureUrl": "http://127.0.0.1:5503/about.html",
     "image": "shots/02-about.jpg",
     "ok": true,
     "url": "https://wiremark.net/about.html"
@@ -24,7 +24,7 @@
     "number": 3,
     "redirect": null,
     "title": "Contact WireMark",
-    "captureUrl": "http://127.0.0.1:5502/contact.html",
+    "captureUrl": "http://127.0.0.1:5503/contact.html",
     "image": "shots/03-contact.jpg",
     "ok": true,
     "url": "https://wiremark.net/contact.html"
@@ -34,7 +34,7 @@
     "number": 4,
     "redirect": null,
     "title": "WireMark — FAQ: Wire, Mark, and Ship on the Live Canvas",
-    "captureUrl": "http://127.0.0.1:5502/faq.html",
+    "captureUrl": "http://127.0.0.1:5503/faq.html",
     "image": "shots/04-faq.jpg",
     "ok": true,
     "url": "https://wiremark.net/faq.html"
@@ -44,7 +44,7 @@
     "number": 5,
     "redirect": null,
     "title": "WireMark — Built for Teams: One Live Canvas",
-    "captureUrl": "http://127.0.0.1:5502/index-2.html",
+    "captureUrl": "http://127.0.0.1:5503/index-2.html",
     "image": "shots/05-index-2.jpg",
     "ok": true,
     "url": "https://wiremark.net/index-2.html"
@@ -54,7 +54,7 @@
     "number": 6,
     "redirect": null,
     "title": "WireMark — Security & Trust on the Live Canvas",
-    "captureUrl": "http://127.0.0.1:5502/index-3.html",
+    "captureUrl": "http://127.0.0.1:5503/index-3.html",
     "image": "shots/06-index-3.jpg",
     "ok": true,
     "url": "https://wiremark.net/index-3.html"
@@ -64,7 +64,7 @@
     "number": 7,
     "redirect": null,
     "title": "WireMark — For Individual Developers: Wire, Mark, Ship",
-    "captureUrl": "http://127.0.0.1:5502/index-4.html",
+    "captureUrl": "http://127.0.0.1:5503/index-4.html",
     "image": "shots/07-index-4.jpg",
     "ok": true,
     "url": "https://wiremark.net/index-4.html"
@@ -74,7 +74,7 @@
     "number": 8,
     "redirect": null,
     "title": "WireMark — Verify & Iterate: Wire, Mark, Ship",
-    "captureUrl": "http://127.0.0.1:5502/index-5.html",
+    "captureUrl": "http://127.0.0.1:5503/index-5.html",
     "image": "shots/08-index-5.jpg",
     "ok": true,
     "url": "https://wiremark.net/index-5.html"
@@ -84,7 +84,7 @@
     "number": 9,
     "redirect": null,
     "title": "WireMark — Visual-First. Wire It. Mark It. Ship It.",
-    "captureUrl": "http://127.0.0.1:5502/index.html",
+    "captureUrl": "http://127.0.0.1:5503/index.html",
     "image": "shots/09-index.jpg",
     "ok": true,
     "url": "https://wiremark.net/index.html"
@@ -94,7 +94,7 @@
     "number": 10,
     "redirect": null,
     "title": "WireMark Journal — Work Over the Running Product",
-    "captureUrl": "http://127.0.0.1:5502/news-details.html",
+    "captureUrl": "http://127.0.0.1:5503/news-details.html",
     "image": "shots/10-news-details.jpg",
     "ok": true,
     "url": "https://wiremark.net/news-details.html"
@@ -104,7 +104,7 @@
     "number": 11,
     "redirect": null,
     "title": "WireMark Journal — All Articles on Wire, Mark, Ship",
-    "captureUrl": "http://127.0.0.1:5502/news-grid.html",
+    "captureUrl": "http://127.0.0.1:5503/news-grid.html",
     "image": "shots/11-news-grid.jpg",
     "ok": true,
     "url": "https://wiremark.net/news-grid.html"
@@ -114,7 +114,7 @@
     "number": 12,
     "redirect": null,
     "title": "WireMark Journal — Insights on Wire, Mark, Ship",
-    "captureUrl": "http://127.0.0.1:5502/news.html",
+    "captureUrl": "http://127.0.0.1:5503/news.html",
     "image": "shots/12-news.jpg",
     "ok": true,
     "url": "https://wiremark.net/news.html"
@@ -124,7 +124,7 @@
     "number": 13,
     "redirect": null,
     "title": "WireMark — Pricing: Starter, Pro, Team, Enterprise",
-    "captureUrl": "http://127.0.0.1:5502/pricing.html",
+    "captureUrl": "http://127.0.0.1:5503/pricing.html",
     "image": "shots/13-pricing.jpg",
     "ok": true,
     "url": "https://wiremark.net/pricing.html"
@@ -134,7 +134,7 @@
     "number": 14,
     "redirect": null,
     "title": "WireMark Showcase — A Visual-First Build Story",
-    "captureUrl": "http://127.0.0.1:5502/project-details.html",
+    "captureUrl": "http://127.0.0.1:5503/project-details.html",
     "image": "shots/14-project-details.jpg",
     "ok": true,
     "url": "https://wiremark.net/project-details.html"
@@ -144,7 +144,7 @@
     "number": 15,
     "redirect": null,
     "title": "WireMark Showcase — Wire, Mark, and Ship Builds",
-    "captureUrl": "http://127.0.0.1:5502/project.html",
+    "captureUrl": "http://127.0.0.1:5503/project.html",
     "image": "shots/15-project.jpg",
     "ok": true,
     "url": "https://wiremark.net/project.html"
@@ -154,7 +154,7 @@
     "number": 16,
     "redirect": null,
     "title": "WireMark — The Visual Loop: Wire, Mark, Ship",
-    "captureUrl": "http://127.0.0.1:5502/service-details.html",
+    "captureUrl": "http://127.0.0.1:5503/service-details.html",
     "image": "shots/16-service-details.jpg",
     "ok": true,
     "url": "https://wiremark.net/service-details.html"
@@ -164,7 +164,7 @@
     "number": 17,
     "redirect": null,
     "title": "WireMark — Capabilities: Wire, Mark, Ship",
-    "captureUrl": "http://127.0.0.1:5502/service.html",
+    "captureUrl": "http://127.0.0.1:5503/service.html",
     "image": "shots/17-service.jpg",
     "ok": true,
     "url": "https://wiremark.net/service.html"
@@ -174,7 +174,7 @@
     "number": 18,
     "redirect": null,
     "title": "WireMark — Team Profile: Visual-First Builders",
-    "captureUrl": "http://127.0.0.1:5502/team-details.html",
+    "captureUrl": "http://127.0.0.1:5503/team-details.html",
     "image": "shots/18-team-details.jpg",
     "ok": true,
     "url": "https://wiremark.net/team-details.html"
@@ -184,7 +184,7 @@
     "number": 19,
     "redirect": null,
     "title": "WireMark — The Team Behind the Live Canvas",
-    "captureUrl": "http://127.0.0.1:5502/team.html",
+    "captureUrl": "http://127.0.0.1:5503/team.html",
     "image": "shots/19-team.jpg",
     "ok": true,
     "url": "https://wiremark.net/team.html"
