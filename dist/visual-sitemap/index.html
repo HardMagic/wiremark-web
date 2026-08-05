@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WireMark — Visual-First Product Environment Visual Sitemap</title>
+
+<style>
+  :root { color-scheme: light; --ink: #17212b; --muted: #66717d; --line: #d8dde3; --paper: #fff; --accent: #9d3026; }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: #eef1f4; color: var(--ink); font: 14px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  header { padding: 32px clamp(20px, 4vw, 64px) 24px; background: var(--paper); border-bottom: 1px solid var(--line); }
+  h1 { margin: 0 0 6px; font-family: Georgia, serif; font-size: clamp(28px, 4vw, 44px); font-weight: 500; }
+  .meta { margin: 0; color: var(--muted); }
+  .summary { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-top: 16px; font-weight: 600; }
+  .directory-wrap { padding: 24px clamp(20px, 4vw, 64px); background: #f8f9fa; border-bottom: 1px solid var(--line); }
+  .directory-wrap h2 { margin: 0 0 12px; font-size: 13px; letter-spacing: .12em; text-transform: uppercase; }
+  .directory { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 5px 20px; margin: 0; padding: 0; list-style: none; }
+  .directory a { display: flex; gap: 8px; color: var(--ink); text-decoration: none; }
+  .directory a:hover { color: var(--accent); text-decoration: underline; }
+  .directory span { flex: 0 0 auto; color: var(--accent); font-variant-numeric: tabular-nums; font-weight: 800; }
+  main { padding: 24px clamp(20px, 4vw, 64px) 64px; }
+  .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: start; gap: 18px; }
+  .card { position: relative; min-width: 0; overflow: hidden; background: var(--paper); border: 1px solid #cbd1d8; border-radius: 8px; box-shadow: 0 2px 8px rgb(28 39 49 / 8%); scroll-margin-top: 16px; }
+  .image-link { display: block; background: #dfe3e7; }
+  .image-link img { display: block; width: 100%; height: auto; }
+  .number { position: absolute; z-index: 1; top: 10px; left: 10px; min-width: 42px; padding: 6px 8px; border: 2px solid #fff; border-radius: 5px; background: var(--accent); color: #fff; box-shadow: 0 2px 7px rgb(0 0 0 / 28%); font-size: 16px; font-weight: 800; line-height: 1; text-align: center; font-variant-numeric: tabular-nums; }
+  .caption { padding: 11px 12px 13px; border-top: 1px solid var(--line); }
+  .filename { font-weight: 750; word-break: break-word; }
+  .title { margin-top: 2px; color: var(--muted); font-size: 12px; }
+  .redirect { margin-top: 7px; padding-top: 7px; border-top: 1px solid #eceff2; color: var(--accent); font-size: 11px; font-weight: 700; }
+  .error { min-height: 180px; display: grid; place-content: center; padding: 20px; color: #9b1c1c; text-align: center; }
+  @media (max-width: 1400px) { .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (max-width: 900px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 560px) { .grid { grid-template-columns: 1fr; } }
+  @media print { .directory-wrap { display: none; } .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } body { background: #fff; } .card { box-shadow: none; } }
+</style>
+</head>
+<body>
+  <header>
+    <h1>WireMark — Visual-First Product Environment Visual Sitemap</h1>
+    <p class="meta">Generated August 5, 2026 at 11:59 AM from https://wiremark.net/</p>
+    <div class="summary"><span>19 numbered pages</span><span>19 screenshots captured</span><span>0 legacy redirects</span></div>
+  </header>
+  <nav class="directory-wrap" aria-label="Page directory">
+    <h2>Numbered page directory</h2>
+    <ol class="directory"><li><a href="#page-01"><span>01</span> 404.html</a></li>
+<li><a href="#page-02"><span>02</span> about.html</a></li>
+<li><a href="#page-03"><span>03</span> contact.html</a></li>
+<li><a href="#page-04"><span>04</span> faq.html</a></li>
+<li><a href="#page-05"><span>05</span> index-2.html</a></li>
+<li><a href="#page-06"><span>06</span> index-3.html</a></li>
+<li><a href="#page-07"><span>07</span> index-4.html</a></li>
+<li><a href="#page-08"><span>08</span> index-5.html</a></li>
+<li><a href="#page-09"><span>09</span> index.html</a></li>
+<li><a href="#page-10"><span>10</span> news-details.html</a></li>
+<li><a href="#page-11"><span>11</span> news-grid.html</a></li>
+<li><a href="#page-12"><span>12</span> news.html</a></li>
+<li><a href="#page-13"><span>13</span> pricing.html</a></li>
+<li><a href="#page-14"><span>14</span> project-details.html</a></li>
+<li><a href="#page-15"><span>15</span> project.html</a></li>
+<li><a href="#page-16"><span>16</span> service-details.html</a></li>
+<li><a href="#page-17"><span>17</span> service.html</a></li>
+<li><a href="#page-18"><span>18</span> team-details.html</a></li>
+<li><a href="#page-19"><span>19</span> team.html</a></li></ol>
+  </nav>
+  <main>
+    <div class="grid"><article class="card" id="page-01">
+      <div class="number">01</div>
+      <a class="image-link" href="shots/01-404.jpg" target="_blank">
+        <img src="shots/01-404.jpg" alt="Screenshot of 404.html" loading="lazy">
+      </a>
+      <div class="caption">
+        <div class="filename">404.html</div>
+        <div class="title">WireMark — Page Not Found</div>
+      </div>
+    </article>
+<article class="card" id="page-02">
+      <div class="number">02</div>
+      <a class="image-link" href="shots/02-about.jpg" target="_blank">
+        <img src="shots/02-about.jpg" alt="Screenshot of about.html" loading="lazy">
+      </a>
+      <div class="caption">
+        <div class="filename">about.html</div>
+        <div class="title">About WireMark — Visual-First Product Environment</div>
+      </div>
+    </article>
+<article class="card" id="page-03">
+      <div class="number">03</div>
+      <a class="image-link" href="shots/03-contact.jpg" target="_blank">
+        <img src="shots/03-contact.jpg" alt="Screenshot of contact.html" loading="lazy">
+      </a>
+      <div class="caption">
+        <div class="filename">contact.html</div>
+        <div class="title">Contact WireMark — Request Access</div>
+      </div>
+    </article>
+<article class="card" id="page-04">
+      <div class="number">04</div>
+      <a class="image-link" href="shots/04-faq.jpg" target="_blank">
+        <img src="shots/04-faq.jpg" alt="Screenshot of faq.html" loading="lazy">
+      </a>
+      <div class="caption">
+        <div class="filename">faq.html</div>
+        <div class="title">WireMark — Frequently Asked Questions</div>
+      </div>
+    </article>
+<article class="card" id="page-05">
+      <div class="number">05</div>
+      <a class="image-link" href="shots/05-index-2.jpg" target="_blank">
+        <img src="shots/05-index-2.jpg" alt="Screenshot of index-2.html" loading="lazy">
+      </a>
+      <div class="caption">
+        <div class="filename">index-2.html</div>
+        <div class="title">WireMark — Built for Teams</div>
+      </div>
+    </article>
+<article class="card" id="page-06">
+      <div class="number">06</div>
+      <a class="image-link" href="shots/06-index-3.jpg" target="_blank">
+        <img src="shots/06-index-3.jpg" alt="Screenshot of index-3.html" loading="lazy">
+      </a>
+      <div class="caption">
+        <div class="filename">index-3.html</div>
+        <div class="title">WireMark — Security &amp; Trust</div>
+      </div>
+    </article>
+<article class="card" id="page-07">
+      <div class="number">07</div>
+      <a class="image-link" href="shots/07-index-4.jpg" target="_blank">
+        <img src="shots/07-index-4.jpg" alt="Screenshot of index-4.html" loading="lazy">
+      </a>
+      <div class="caption">
+        <div class="filename">index-4.html</div>
+        <div class="title">WireMark — For Individual Developers</div>
+      </div>
+    </article>
+<article class="card" id="page-08">
+      <div class="number">08</div>
+      <a class="image-link" href="shots/08-index-5.jpg" target="_blank">
+        <img src="shots/08-index-5.jpg" alt="Screenshot of index-5.html" loading="lazy">
+      </a>
+      <div class="caption">
+        <div class="filename">index-5.html</div>
+        <div class="title">WireMark — Verify &amp; Iterate</div>
+      </div>
+    </article>
+<article class="card" id="page-09">
+      <div class="number">09</div>
+      <a class="image-link" href="shots/09-index.jpg" target="_blank">
+        <img src="shots/09-index.jpg" alt="Screenshot of index.html" loading="lazy">
+      </a>
+      <div class="caption">
+        <div class="filename">index.html</div>
+        <div class="title">WireMark — Visual-First Product Environment</div>
+      </div>
+    </article>
+<article class="card" id="page-10">
+      <div class="number">10</div>
+      <a class="image-link" href="shots/10-news-details.jpg" target="_blank">
+        <img src="shots/10-news-details.jpg" alt="Screenshot of news-details.html" loading="lazy">
+      </a>
+      <div class="caption">
+        <div class="filename">news-details.html</div>
+        <div class="title">WireMark Journal — Article</div>
+      </div>
+    </article>
+<article class="card" id="page-11">
+      <div class="number">11</div>
+      <a class="image-link" href="shots/11-news-grid.jpg" target="_blank">
+        <img src="shots/11-news-grid.jpg" alt="Screenshot of news-grid.html" loading="lazy">
+      </a>
+      <div class="caption">
+        <div class="filename">news-grid.html</div>
+        <div class="title">WireMark Journal — Grid</div>
+      </div>
+    </article>
+<article class="card" id="page-12">
+      <div class="number">12</div>
+      <a class="image-link" href="shots/12-news.jpg" target="_blank">
+        <img src="shots/12-news.jpg" alt="Screenshot of news.html" loading="lazy">
+      </a>
+      <div class="caption">
+        <div class="filename">news.html</div>
+        <div class="title">WireMark Journal — Insights</div>
+      </div>
+    </article>
+<article class="card" id="page-13">
+      <div class="number">13</div>
+      <a class="image-link" href="shots/13-pricing.jpg" target="_blank">
+        <img src="shots/13-pricing.jpg" alt="Screenshot of pricing.html" loading="lazy">
+      </a>
+      <div class="caption">
+        <div class="filename">pricing.html</div>
+        <div class="title">WireMark — Access &amp; Pricing</div>
+      </div>
+    </article>
+<article class="card" id="page-14">
+      <div class="number">14</div>
+      <a class="image-link" href="shots/14-project-details.jpg" target="_blank">
+        <img src="shots/14-project-details.jpg" alt="Screenshot of project-details.html" loading="lazy">
+      </a>
+      <div class="caption">
+        <div class="filename">project-details.html</div>
+        <div class="title">WireMark Showcase — Story</div>
+      </div>
+    </article>
+<article class="card" id="page-15">
+      <div class="number">15</div>
+      <a class="image-link" href="shots/15-project.jpg" target="_blank">
+        <img src="shots/15-project.jpg" alt="Screenshot of project.html" loading="lazy">
+      </a>
+      <div class="caption">
+        <div class="filename">project.html</div>
+        <div class="title">WireMark Showcase</div>
+      </div>
+    </article>
+<article class="card" id="page-16">
+      <div class="number">16</div>
+      <a class="image-link" href="shots/16-service-details.jpg" target="_blank">
+        <img src="shots/16-service-details.jpg" alt="Screenshot of service-details.html" loading="lazy">
+      </a>
+      <div class="caption">
+        <div class="filename">service-details.html</div>
+        <div class="title">WireMark — Capability Details</div>
+      </div>
+    </article>
+<article class="card" id="page-17">
+      <div class="number">17</div>
+      <a class="image-link" href="shots/17-service.jpg" target="_blank">
+        <img src="shots/17-service.jpg" alt="Screenshot of service.html" loading="lazy">
+      </a>
+      <div class="caption">
+        <div class="filename">service.html</div>
+        <div class="title">WireMark — Capabilities</div>
+      </div>
+    </article>
+<article class="card" id="page-18">
+      <div class="number">18</div>
+      <a class="image-link" href="shots/18-team-details.jpg" target="_blank">
+        <img src="shots/18-team-details.jpg" alt="Screenshot of team-details.html" loading="lazy">
+      </a>
+      <div class="caption">
+        <div class="filename">team-details.html</div>
+        <div class="title">WireMark — Team Profile</div>
+      </div>
+    </article>
+<article class="card" id="page-19">
+      <div class="number">19</div>
+      <a class="image-link" href="shots/19-team.jpg" target="_blank">
+        <img src="shots/19-team.jpg" alt="Screenshot of team.html" loading="lazy">
+      </a>
+      <div class="caption">
+        <div class="filename">team.html</div>
+        <div class="title">WireMark — Team</div>
+      </div>
+    </article></div>
+  </main>
+</body>
+</html>

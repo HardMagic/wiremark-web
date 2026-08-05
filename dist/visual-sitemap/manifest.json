@@ -1,0 +1,192 @@
+[
+  {
+    "file": "404.html",
+    "number": 1,
+    "redirect": null,
+    "title": "WireMark — Page Not Found",
+    "captureUrl": "http://127.0.0.1:5501/404.html",
+    "image": "shots/01-404.jpg",
+    "ok": true,
+    "url": "https://wiremark.net/404.html"
+  },
+  {
+    "file": "about.html",
+    "number": 2,
+    "redirect": null,
+    "title": "About WireMark — Visual-First Product Environment",
+    "captureUrl": "http://127.0.0.1:5501/about.html",
+    "image": "shots/02-about.jpg",
+    "ok": true,
+    "url": "https://wiremark.net/about.html"
+  },
+  {
+    "file": "contact.html",
+    "number": 3,
+    "redirect": null,
+    "title": "Contact WireMark — Request Access",
+    "captureUrl": "http://127.0.0.1:5501/contact.html",
+    "image": "shots/03-contact.jpg",
+    "ok": true,
+    "url": "https://wiremark.net/contact.html"
+  },
+  {
+    "file": "faq.html",
+    "number": 4,
+    "redirect": null,
+    "title": "WireMark — Frequently Asked Questions",
+    "captureUrl": "http://127.0.0.1:5501/faq.html",
+    "image": "shots/04-faq.jpg",
+    "ok": true,
+    "url": "https://wiremark.net/faq.html"
+  },
+  {
+    "file": "index-2.html",
+    "number": 5,
+    "redirect": null,
+    "title": "WireMark — Built for Teams",
+    "captureUrl": "http://127.0.0.1:5501/index-2.html",
+    "image": "shots/05-index-2.jpg",
+    "ok": true,
+    "url": "https://wiremark.net/index-2.html"
+  },
+  {
+    "file": "index-3.html",
+    "number": 6,
+    "redirect": null,
+    "title": "WireMark — Security & Trust",
+    "captureUrl": "http://127.0.0.1:5501/index-3.html",
+    "image": "shots/06-index-3.jpg",
+    "ok": true,
+    "url": "https://wiremark.net/index-3.html"
+  },
+  {
+    "file": "index-4.html",
+    "number": 7,
+    "redirect": null,
+    "title": "WireMark — For Individual Developers",
+    "captureUrl": "http://127.0.0.1:5501/index-4.html",
+    "image": "shots/07-index-4.jpg",
+    "ok": true,
+    "url": "https://wiremark.net/index-4.html"
+  },
+  {
+    "file": "index-5.html",
+    "number": 8,
+    "redirect": null,
+    "title": "WireMark — Verify & Iterate",
+    "captureUrl": "http://127.0.0.1:5501/index-5.html",
+    "image": "shots/08-index-5.jpg",
+    "ok": true,
+    "url": "https://wiremark.net/index-5.html"
+  },
+  {
+    "file": "index.html",
+    "number": 9,
+    "redirect": null,
+    "title": "WireMark — Visual-First Product Environment",
+    "captureUrl": "http://127.0.0.1:5501/index.html",
+    "image": "shots/09-index.jpg",
+    "ok": true,
+    "url": "https://wiremark.net/index.html"
+  },
+  {
+    "file": "news-details.html",
+    "number": 10,
+    "redirect": null,
+    "title": "WireMark Journal — Article",
+    "captureUrl": "http://127.0.0.1:5501/news-details.html",
+    "image": "shots/10-news-details.jpg",
+    "ok": true,
+    "url": "https://wiremark.net/news-details.html"
+  },
+  {
+    "file": "news-grid.html",
+    "number": 11,
+    "redirect": null,
+    "title": "WireMark Journal — Grid",
+    "captureUrl": "http://127.0.0.1:5501/news-grid.html",
+    "image": "shots/11-news-grid.jpg",
+    "ok": true,
+    "url": "https://wiremark.net/news-grid.html"
+  },
+  {
+    "file": "news.html",
+    "number": 12,
+    "redirect": null,
+    "title": "WireMark Journal — Insights",
+    "captureUrl": "http://127.0.0.1:5501/news.html",
+    "image": "shots/12-news.jpg",
+    "ok": true,
+    "url": "https://wiremark.net/news.html"
+  },
+  {
+    "file": "pricing.html",
+    "number": 13,
+    "redirect": null,
+    "title": "WireMark — Access & Pricing",
+    "captureUrl": "http://127.0.0.1:5501/pricing.html",
+    "image": "shots/13-pricing.jpg",
+    "ok": true,
+    "url": "https://wiremark.net/pricing.html"
+  },
+  {
+    "file": "project-details.html",
+    "number": 14,
+    "redirect": null,
+    "title": "WireMark Showcase — Story",
+    "captureUrl": "http://127.0.0.1:5501/project-details.html",
+    "image": "shots/14-project-details.jpg",
+    "ok": true,
+    "url": "https://wiremark.net/project-details.html"
+  },
+  {
+    "file": "project.html",
+    "number": 15,
+    "redirect": null,
+    "title": "WireMark Showcase",
+    "captureUrl": "http://127.0.0.1:5501/project.html",
+    "image": "shots/15-project.jpg",
+    "ok": true,
+    "url": "https://wiremark.net/project.html"
+  },
+  {
+    "file": "service-details.html",
+    "number": 16,
+    "redirect": null,
+    "title": "WireMark — Capability Details",
+    "captureUrl": "http://127.0.0.1:5501/service-details.html",
+    "image": "shots/16-service-details.jpg",
+    "ok": true,
+    "url": "https://wiremark.net/service-details.html"
+  },
+  {
+    "file": "service.html",
+    "number": 17,
+    "redirect": null,
+    "title": "WireMark — Capabilities",
+    "captureUrl": "http://127.0.0.1:5501/service.html",
+    "image": "shots/17-service.jpg",
+    "ok": true,
+    "url": "https://wiremark.net/service.html"
+  },
+  {
+    "file": "team-details.html",
+    "number": 18,
+    "redirect": null,
+    "title": "WireMark — Team Profile",
+    "captureUrl": "http://127.0.0.1:5501/team-details.html",
+    "image": "shots/18-team-details.jpg",
+    "ok": true,
+    "url": "https://wiremark.net/team-details.html"
+  },
+  {
+    "file": "team.html",
+    "number": 19,
+    "redirect": null,
+    "title": "WireMark — Team",
+    "captureUrl": "http://127.0.0.1:5501/team.html",
+    "image": "shots/19-team.jpg",
+    "ok": true,
+    "url": "https://wiremark.net/team.html"
+  }
+]
