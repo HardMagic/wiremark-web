@@ -1103,10 +1103,10 @@
                 price.classList.add("fade-out");
 
                 setTimeout(() => {
-                    const value = price.dataset[type];
-                    const period = type === "monthly" ? "months" : "year";
+                    const value = price.dataset[type + "Value"];
+                    const sub = price.dataset[type + "Sub"] || (type === "monthly" ? "/mo" : "/mo billed annually");
 
-                    price.innerHTML = `$${value}<sub>/ ${period}</sub>`;
+                    price.innerHTML = `$${value}<sub>${sub}</sub>`;
 
                     price.classList.remove("fade-out");
                     price.classList.add("fade-in");

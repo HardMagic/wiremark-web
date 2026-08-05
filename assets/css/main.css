@@ -1370,6 +1370,19 @@ span {
 .header-main .navbar .navbar-nav .nav-item .nav-link:hover {
   color: var(--theme);
 }
+.header-main .navbar .navbar-nav .nav-item .nav-link.active {
+  color: var(--theme);
+}
+.header-main .menu-right-info .sign-in-link {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--header);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+.header-main .menu-right-info .sign-in-link:hover {
+  color: var(--theme);
+}
 .header-main .navbar .navbar-nav .nav-item {
   /* ===============================
      FIRST LEVEL SUBMENU
@@ -2124,11 +2137,11 @@ span {
 .header-1 .menu-right-info {
   display: flex;
   align-items: center;
-  gap: 60px;
+  gap: 24px;
 }
 @media (max-width: 1600px) {
   .header-1 .menu-right-info {
-    gap: 20px;
+    gap: 16px;
   }
 }
 .header-1 .navbar-collapse {
