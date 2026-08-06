@@ -8,7 +8,7 @@ import {
     Plane
 } from "./distortion-img-depend.js";
 
-(function ($) {
+(function () {
 "use strict";
 
 const vertex = `
@@ -117,4 +117,4 @@ document.querySelectorAll(".image-distortion").forEach((background)=>{
 
 });
 
-})(jQuery);
+})();
