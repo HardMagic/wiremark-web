@@ -1,0 +1,15 @@
+# Static marketing site (no build step: the repo root is what is served).
+# Production deploy is .github/workflows/pages.yml (GitHub Pages, wiremark.net),
+# so gh-pages is mirrored outside this pipeline (GITHUB_MIRROR_EXTERNAL).
+#
+# Before this file existed GitLab fell back to Auto DevOps, which tried to build
+# a Heroku buildpack image and run tests on a static site, leaving the default
+# branch pipeline red since 2026-08-05.
+include:
+  - project: 'DroidOpsInc/launch-sequence'
+    ref: main
+    file: '/pipelines/static-site.yml'
+
+variables:
+  GITHUB_REPO: "HardMagic/wiremark-web"
+  GITHUB_MIRROR_EXTERNAL: "true"
