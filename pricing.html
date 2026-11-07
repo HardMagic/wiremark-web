@@ -12,6 +12,7 @@
         <title>WireMark — Pricing: Starter, Pro, Team, Enterprise</title>
         <!--<< Favcion >>-->
         <link rel="shortcut icon" href="assets/img/favicon.svg">
+        <link rel="preload" as="font" type="font/woff2" href="assets/webfonts/plus-jakarta-sans-normal-latin.woff2" crossorigin>
         <!--<< Bootstrap min.css >>-->
         <link rel="stylesheet" href="assets/css/bootstrap.min.css">
         <!--<< All Min Css >>-->
@@ -21,7 +22,8 @@
         <!--<< Swiper Bundle.css >>-->
         <link rel="stylesheet" href="assets/css/swiper-bundle.min.css">
         <!--<< GLightbox css >>-->
-        <link rel="stylesheet" href="assets/css/glightbox.min.css">
+        <link rel="stylesheet" href="assets/css/glightbox.min.css" media="print" onload="this.media='all'">
+        <noscript><link rel="stylesheet" href="assets/css/glightbox.min.css"></noscript>
         <!--<< Main.css >>-->
         <link rel="stylesheet" href="assets/css/main.css">
         <!-- ========== SEO ========== -->
@@ -341,7 +343,7 @@
                                     </div>
                                 </div>
                                 <div class="col-xl-3 col-lg-6 col-md-6 wow animate__fadeInUp" data-wow-delay=".5s">
-                                    <div class="pricing-box-items active bg-cover" style="background-image: url('assets/img/home-1/pricing-active.png');">
+                                    <div class="pricing-box-items active bg-cover" style="background-image: url('assets/img/home-1/pricing-active.webp');">
                                         <div class="pricing-header">
                                             <span class="sub-price">Pro</span>
                                             <p class="price-text">
