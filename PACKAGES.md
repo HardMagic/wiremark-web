@@ -2,10 +2,9 @@
 
 This site is a vendored build of the **Synex** SaaS HTML template with every framework
 and JS/CSS package raised to its latest stable version. All JS/CSS vendored libraries are
-self-contained under `assets/` — no runtime CDN for libraries. **The one external request
-is the Google Fonts `@import`** in `assets/css/main.css` (line 20) that loads **Plus Jakarta
-Sans** (variable font, wght 200–800, normal + italic, `display=swap` — verified current as
-of Aug 2026).
+self-contained under `assets/` — no runtime CDN for libraries or fonts. **Plus Jakarta Sans is self-hosted** (variable font, wght 200-800, normal + italic,
+`display=swap`, the same files and `unicode-range` subsets Google Fonts serves, as `assets/webfonts/plus-jakarta-sans-*.woff2`,
+declared at the top of `assets/css/main.css`; verified current as of Aug 2026).
 
 **2026-08 postured up:** dropped jQuery entirely and replaced every abandoned jQuery
 plugin with a modern vanilla-JS equivalent. The site now ships **zero jQuery consumer
@@ -23,7 +22,7 @@ Site build date: 2026-08-05. Posture-up date: 2026-08-06.
 | Bootstrap | **5.3.8** | Latest stable (verified npm `latest`). `bootstrap.min.css` + `bootstrap.bundle.min.js` — standalone, no jQuery dependency. |
 | Swiper | **14.0.7** | Latest stable (2026-07-28). `swiper-bundle.min.js` + `swiper-bundle.min.css`. All carousels (hero, testimonials, team, brands, product-tour, mobile) verified in headless browser. |
 | GSAP + plugins | **3.15.0** | Latest stable. ScrollTrigger, ScrollSmoother, ScrollToPlugin, SplitText, TextPlugin — all free-tier (moved off Club in 3.13). Drives scroll reveals, smooth scrolling, text splits, panel pins. **Replaces the old WOW.js / jQuery reveal role.** |
-| Font Awesome | **Free 6.7.2** | Last 6.x (verified). 7.x exists but restructures the icon class system (416 `fa-solid` + 73 `fa-regular` usages) for no visual benefit — deliberate keep, documented. Replaced the template's Pro webfonts with the Free set. |
+| Font Awesome | **Free 6.7.2** | Last 6.x (verified). 7.x exists but restructures the icon class system (416 `fa-solid` + 73 `fa-regular` usages) for no visual benefit — deliberate keep, documented. Replaced the template's Pro webfonts with the Free set. **`fa-solid-900.woff2` and `fa-regular-400.woff2` are subsets** with only the glyphs the pages use (the full fonts remain as the `.ttf` files, which browsers never load). After adding an icon to a page, run `python3 scripts/subset-fontawesome.py` (needs `fonttools` and `brotli`). |
 | **GLightbox** | **3.3.1** | **New** (MIT, vanilla JS, ~11KB gz). Replaces magnific-popup for the live `.video-popup` (index-2) and future `.img-popup` galleries. `glightbox.min.js` + `glightbox.min.css`. The only newly-added dependency. |
 | three.js | — (removed) | The template's WebGL hero (`webgl.js`) was **dead code** — class never instantiated, target DOM (`#canvas-slider`, `.slide-img`) doesn't exist on any page. Removed `webgl.js`, `three.core.min.js`, `three.module.min.js` entirely. No r118 or 0.183 code ships. |
 | jQuery | **— (removed)** | **Dropped completely.** Every abandoned jQuery plugin was replaced or removed (see below), so no jQuery consumer remains. `main.js` and `distortion-img.js` rewritten to 100% vanilla JS. |

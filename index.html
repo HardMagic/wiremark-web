@@ -12,6 +12,9 @@
         <title>WireMark — Visual-First. Wire It. Mark It. Ship It.</title>
         <!--<< Favcion >>-->
         <link rel="shortcut icon" href="assets/img/favicon.svg">
+        <!--<< Preload the hero background (otherwise discovered only after main.js runs) >>-->
+        <link rel="preload" as="image" href="assets/img/home-1/hero-bg.webp" type="image/webp" fetchpriority="high">
+        <link rel="preload" as="font" type="font/woff2" href="assets/webfonts/plus-jakarta-sans-normal-latin.woff2" crossorigin>
         <!--<< Bootstrap min.css >>-->
         <link rel="stylesheet" href="assets/css/bootstrap.min.css">
         <!--<< All Min Css >>-->
@@ -21,7 +24,8 @@
         <!--<< Swiper Bundle.css >>-->
         <link rel="stylesheet" href="assets/css/swiper-bundle.min.css">
         <!--<< GLightbox css >>-->
-        <link rel="stylesheet" href="assets/css/glightbox.min.css">
+        <link rel="stylesheet" href="assets/css/glightbox.min.css" media="print" onload="this.media='all'">
+        <noscript><link rel="stylesheet" href="assets/css/glightbox.min.css"></noscript>
         <!--<< Main.css >>-->
         <link rel="stylesheet" href="assets/css/main.css">
         <!-- ========== SEO ========== -->
@@ -240,7 +244,7 @@
                 <div id="smooth-content">
                     
                     <!-- Hero Section Start -->
-                    <section class="hero-section hero-1 fix bg-cover hero-ptb image-distortion p-relative z-index-1" data-background="assets/img/home-1/hero-bg.jpg">
+                    <section class="hero-section hero-1 fix bg-cover hero-ptb image-distortion p-relative z-index-1" data-background="assets/img/home-1/hero-bg.webp" style="background-image: url('assets/img/home-1/hero-bg.webp');">
                         <div class="container">
                             <div class="row justify-content-center">
                                 <div class="col-lg-9">
@@ -404,8 +408,8 @@
                                 <div class="col-xl-8 col-lg-7 wow animate__fadeInUp" data-wow-delay=".3s">
                                     <div class="service-box-items">
                                         <div class="thumb">
-                                            <img src="assets/img/home-1/service-1.jpg" loading="lazy" decoding="async" alt="WireMark visual workspace feature preview">
-                                            <img src="assets/img/home-1/service-1.jpg" loading="lazy" decoding="async" alt="WireMark visual workspace feature preview">
+                                            <img src="assets/img/home-1/service-1.webp" loading="lazy" decoding="async" alt="WireMark visual workspace feature preview">
+                                            <img src="assets/img/home-1/service-1.webp" loading="lazy" decoding="async" alt="WireMark visual workspace feature preview">
                                         </div>
                                         <div class="content">
                                             <h3 class="title">
@@ -420,8 +424,8 @@
                                 <div class="col-xl-4 col-lg-5 wow animate__fadeInUp" data-wow-delay=".5s">
                                      <div class="service-box-items">
                                         <div class="thumb">
-                                            <img src="assets/img/home-1/service-2.jpg" loading="lazy" decoding="async" alt="WireMark markup and annotation feature preview">
-                                            <img src="assets/img/home-1/service-2.jpg" loading="lazy" decoding="async" alt="WireMark markup and annotation feature preview">
+                                            <img src="assets/img/home-1/service-2.webp" loading="lazy" decoding="async" alt="WireMark markup and annotation feature preview">
+                                            <img src="assets/img/home-1/service-2.webp" loading="lazy" decoding="async" alt="WireMark markup and annotation feature preview">
                                         </div>
                                         <div class="content">
                                             <h3 class="title">
@@ -436,8 +440,8 @@
                                 <div class="col-xl-4 col-lg-5 wow animate__fadeInUp" data-wow-delay=".3s">
                                      <div class="service-box-items">
                                         <div class="thumb">
-                                            <img src="assets/img/home-1/service-3.jpg" loading="lazy" decoding="async" alt="WireMark change verification feature preview">
-                                            <img src="assets/img/home-1/service-3.jpg" loading="lazy" decoding="async" alt="WireMark change verification feature preview">
+                                            <img src="assets/img/home-1/service-3.webp" loading="lazy" decoding="async" alt="WireMark change verification feature preview">
+                                            <img src="assets/img/home-1/service-3.webp" loading="lazy" decoding="async" alt="WireMark change verification feature preview">
                                         </div>
                                         <div class="content">
                                             <h3 class="title">
@@ -452,8 +456,8 @@
                                 <div class="col-xl-8 col-lg-7 wow animate__fadeInUp" data-wow-delay=".5s">
                                     <div class="service-box-items">
                                         <div class="thumb">
-                                            <img src="assets/img/home-1/service-4.jpg" loading="lazy" decoding="async" alt="WireMark implementation workspace feature preview">
-                                            <img src="assets/img/home-1/service-4.jpg" loading="lazy" decoding="async" alt="WireMark implementation workspace feature preview">
+                                            <img src="assets/img/home-1/service-4.webp" loading="lazy" decoding="async" alt="WireMark implementation workspace feature preview">
+                                            <img src="assets/img/home-1/service-4.webp" loading="lazy" decoding="async" alt="WireMark implementation workspace feature preview">
                                         </div>
                                         <div class="content">
                                             <h3 class="title">
@@ -536,7 +540,7 @@
                             </div>
                             <div class="hero-items">
                                  <div class="dashboard-image hero-animation">
-                                    <img src="assets/img/home-1/dashboard-image.png" loading="lazy" decoding="async" alt="The WireMark live canvas over a running product">
+                                    <img src="assets/img/home-1/dashboard-image.webp" loading="lazy" decoding="async" alt="The WireMark live canvas over a running product">
                                 </div>
                             </div>
                         </div>
@@ -602,8 +606,8 @@
                                 </div>
                                 <div class="col-xxl-6 col-xl-6 col-lg-6">
                                     <div class="how-it-image wow animate__fadeInUp" data-wow-delay=".4s">
-                                        <img src="assets/img/home-1/how-it-image.png" loading="lazy" decoding="async" alt="The WireMark observe-to-verify workflow illustrated">
-                                        <img src="assets/img/home-1/how-it-image.png" loading="lazy" decoding="async" alt="The WireMark observe-to-verify workflow illustrated">
+                                        <img src="assets/img/home-1/how-it-image.webp" loading="lazy" decoding="async" alt="The WireMark observe-to-verify workflow illustrated">
+                                        <img src="assets/img/home-1/how-it-image.webp" loading="lazy" decoding="async" alt="The WireMark observe-to-verify workflow illustrated">
                                     </div>
                                 </div>
                             </div>
@@ -613,7 +617,7 @@
                     <!-- Testimonial Section Start -->
                     <section class="testimonial-section fix section-padding">
                          <div class="ripple-image ripples position-absolute w-100 h-100 top-0 start-0 z-0">
-                            <img src="assets/img/home-1/testimonial-bg.jpg" loading="lazy" decoding="async" alt="">
+                            <img src="assets/img/home-1/testimonial-bg.webp" loading="lazy" decoding="async" alt="">
                         </div>
                         <div class="container">
                              <div class="section-title text-center">
@@ -938,7 +942,7 @@
                                     </div>
                                 </div>
                                 <div class="col-xl-4 col-lg-6 col-md-6 wow animate__fadeInUp" data-wow-delay=".5s">
-                                    <div class="pricing-box-items active bg-cover" style="background-image: url('assets/img/home-1/pricing-active.png');">
+                                    <div class="pricing-box-items active bg-cover" style="background-image: url('assets/img/home-1/pricing-active.webp');">
                                         <div class="pricing-header">
                                             <span class="sub-price">Pro</span>
                                             <p class="price-text">
