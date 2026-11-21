@@ -1,0 +1,55 @@
+# orbital.yaml (launch-sequence schema v1.2, ADR 0016, DroidOpsInc/launch-sequence#336).
+# The file declares, a check proves. Roadmap: wiremark/ops#2 (Wiremark roadmap epic).
+schema_version: "1.2"
+name: Wiremark Site
+category: frontend
+team: wiremark
+description: >
+  Static marketing site for Wiremark at https://wiremark.net. No build step:
+  the repo root is what GitHub Pages serves (.github/workflows/pages.yml).
+
+gitlab:
+  projects:
+    - id: 1900
+      name: "wiremark/site"
+      short: site
+
+# Static HTML and CSS with vendored JavaScript and the Playwright checks
+# (*.mjs). Python is never listed: scripts/subset-fontawesome.py predates the
+# group rule and is not a declared language.
+stack:
+  languages: [javascript]
+
+# A static site: maintained, not migrating (ADR 0016 rule 2).
+lifecycle: static
+
+owner:
+  unit: wiremark
+  commander: cmd-wiremark
+  epic: "HardMagic&13"
+  ops_item: wiremark/ops#6
+
+# wiremark.net is public and visited today.
+users:
+  live: true
+
+# The site keeps its vendored template styles; it is not a suite app.
+ui:
+  kit: none
+
+delivery:
+  branches:
+    work: agent/<seat>/<issue>-<slug>
+    integration: integrate/<topic>
+    default: main
+  # Public: https://wiremark.net (apex, CNAME), served by GitHub Pages from
+  # main through .github/workflows/pages.yml. It is the only public route in
+  # the wiremark group; every other Wiremark surface is Ziti only. Schema v1.2
+  # environments need a cluster namespace and an ArgoCD Application, which
+  # GitHub Pages does not have, so nothing in the cluster is declared here
+  # until the schema can name a non-cluster public host (raised on
+  # DroidOpsInc/launch-sequence#336).
+  live: none
+
+# No databases or volumes: no protection.
+protection: []
