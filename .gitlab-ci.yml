@@ -33,5 +33,9 @@ public-surface:
   image: harbor.focuscell.org/dockerhub-proxy/library/node:26.13.1-alpine@sha256:6bd9ab43c0ec0190ca7b2d193906cb8b7edf6e7f4afa43ddeccd6452710bffb5
   script:
     - node scripts/check-public-surface.mjs --self-test
+    # Offline rules of the live TLS check (wiremark/ops#23); the live check
+    # itself runs hourly in .github/workflows/pages.yml, which reaches the
+    # public internet.
+    - node scripts/check-tls.mjs --self-test
     - sh scripts/build-site.sh _site
     - node scripts/check-public-surface.mjs _site
