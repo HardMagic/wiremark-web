@@ -4,18 +4,25 @@ on:
   push:
     branches: ["main"]
   workflow_dispatch:
+  # Hourly certificate and HTTPS check (wiremark/ops#23): the https job heals a
+  # missing or failed Pages certificate, and the TLS check makes a wrong or
+  # expiring certificate a red run. Scheduled runs do not redeploy.
+  schedule:
+    - cron: "23 * * * *"
 
 permissions:
   contents: read
   pages: write
   id-token: write
 
+# A scheduled check must never cancel a deploy, so it has its own group.
 concurrency:
-  group: pages
+  group: ${{ github.event_name == 'schedule' && 'pages-https' || 'pages' }}
   cancel-in-progress: true
 
 jobs:
   build:
+    if: github.event_name != 'schedule'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -44,3 +51,24 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
+
+  # Keep the custom-domain certificate issued and HTTPS enforced, then prove
+  # what the public sees: apex and www must serve a trusted certificate that
+  # covers the host and is valid for at least 14 more days (wiremark/ops#23).
+  # Runs after a deploy, and alone on the schedule.
+  https:
+    needs: deploy
+    if: ${{ !cancelled() && needs.deploy.result != 'failure' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Heal Pages certificate and enforce HTTPS
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: sh scripts/pages-https.sh "${{ github.repository }}"
+      - name: TLS check (apex and www)
+        run: node scripts/check-tls.mjs --min-days 14
