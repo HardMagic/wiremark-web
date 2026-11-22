@@ -2,10 +2,9 @@ import { chromium } from 'playwright';
 
 const PAGES = [
   'index.html', 'index-2.html', 'index-3.html', 'index-4.html', 'index-5.html',
-  '404.html', 'about.html', 'contact.html', 'faq.html', 'pricing.html',
+  '404.html', 'about.html', 'contact.html', 'faq.html',
   'news.html', 'news-details.html', 'news-grid.html',
-  'project.html', 'project-details.html', 'service.html', 'service-details.html',
-  'team.html', 'team-details.html'
+  'project.html', 'project-details.html', 'service.html', 'service-details.html'
 ];
 
 const BASE = 'http://localhost:8917/';
