@@ -30,7 +30,7 @@ jobs:
       - name: Public-surface gate
         run: node scripts/check-public-surface.mjs _site
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           path: '_site'
 
