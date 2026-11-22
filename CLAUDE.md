@@ -9,7 +9,7 @@ Static marketing site for **WireMark** (HardMagic), deployed to GitHub Pages at 
 ## Build, test, deploy
 
 - **Allow-list build, no framework.** `sh scripts/build-site.sh _site` copies only the site files (`*.html`, `assets/`, `CNAME`, `robots.txt`, `sitemap.xml`) into `_site/`; `.github/workflows/pages.yml` publishes `_site/`, never the repo root. A new top-level site file must be added to that script.
-- **Public-surface gate.** `node scripts/check-public-surface.mjs _site` fails on a password field or form, an internal hostname, a price, an `app.wiremark.net` link without the private-network note nearby, or any other `*.wiremark.net` link. It runs in GitLab CI (`public-surface` job) and before the GitHub Pages upload; `--self-test` checks every rule against `tests/public-surface/`. When you add a rule, add a fixture.
+- **Public-surface gate.** `node scripts/check-public-surface.mjs _site` fails on a password field or form, an internal hostname, a price, an `app.wiremark.net` link without the private-network note nearby, any other `*.wiremark.net` link, or a Cloudflare `/cdn-cgi/` rewrite (Email Obfuscation, wiremark/ops#20). It runs in GitLab CI (`public-surface` job) and before the GitHub Pages upload; `--live` runs the same rules on every sitemap page as wiremark.net serves it, after each deploy and hourly in `.github/workflows/pages.yml`; `--self-test` checks every rule against `tests/public-surface/`. When you add a rule, add a fixture.
 - **`npm test` is a broken stub** (`echo "Error: no test specified" && exit 1`) — do not run it as a test gate. The only real verification is Playwright (only dependency) run against the built/served pages.
 - **Deploy is merge-to-main.** CI deploys automatically. There is no preview environment.
 

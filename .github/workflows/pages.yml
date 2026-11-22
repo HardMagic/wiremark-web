@@ -72,3 +72,10 @@ jobs:
         run: sh scripts/pages-https.sh "${{ github.repository }}"
       - name: TLS check (apex and www)
         run: node scripts/check-tls.mjs --min-days 14
+      # The public-surface rules on what the public is actually served: every
+      # sitemap page, fetched live. Catches edge rewrites that never exist in
+      # _site, such as Cloudflare Email Obfuscation's /cdn-cgi/ links
+      # (wiremark/ops#20) if the zone is ever proxied again.
+      - name: Public-surface gate (live)
+        if: ${{ !cancelled() }}
+        run: node scripts/check-public-surface.mjs --live
