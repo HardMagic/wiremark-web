@@ -10291,3 +10291,24 @@ span {
   background-clip: text;
   -webkit-background-clip: text;
 }/*# sourceMappingURL=main.css.map */
+
+/* Private-network note next to every link to the WireMark app. The app is
+   reachable only over our private network (Ziti); wiremark.net is the only
+   public surface (wiremark/ops#21). The public-surface gate checks the note. */
+.wm-private-note {
+  display: block;
+  margin-top: 6px;
+  font-size: 13px;
+  line-height: 1.35;
+  opacity: 0.8;
+}
+.wm-app-entry {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.2;
+}
+.wm-app-entry .wm-private-note {
+  margin-top: 2px;
+  font-size: 11px;
+}

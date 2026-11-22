@@ -7,7 +7,7 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="author" content="WireMark">
-        <meta name="description" content="WireMark FAQ: which repositories you can connect, how sandboxed previews keep code safe, the wire-mark-ship loop, and which plan fits your team.">
+        <meta name="description" content="WireMark FAQ: which repositories you can connect, how sandboxed previews keep code safe, and how the wire-mark-ship loop works.">
         <!-- ======== Page title ============ -->
         <title>WireMark — FAQ: Wire, Mark, and Ship on the Live Canvas</title>
         <!--<< Favcion >>-->
@@ -30,13 +30,13 @@
     <link rel="canonical" href="https://wiremark.net/faq.html">
     <meta property="og:site_name" content="WireMark">
     <meta property="og:title" content="WireMark — FAQ: Wire, Mark, and Ship on the Live Canvas">
-    <meta property="og:description" content="WireMark FAQ: which repositories you can connect, how sandboxed previews keep code safe, the wire-mark-ship loop, and which plan fits your team.">
+    <meta property="og:description" content="WireMark FAQ: which repositories you can connect, how sandboxed previews keep code safe, and how the wire-mark-ship loop works.">
     <meta property="og:url" content="https://wiremark.net/faq.html">
     <meta property="og:type" content="website">
     <meta property="og:image" content="https://wiremark.net/assets/img/home-1/hero-bg.jpg">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="WireMark — FAQ: Wire, Mark, and Ship on the Live Canvas">
-    <meta name="twitter:description" content="WireMark FAQ: which repositories you can connect, how sandboxed previews keep code safe, the wire-mark-ship loop, and which plan fits your team.">
+    <meta name="twitter:description" content="WireMark FAQ: which repositories you can connect, how sandboxed previews keep code safe, and how the wire-mark-ship loop works.">
     <meta name="twitter:image" content="https://wiremark.net/assets/img/home-1/hero-bg.jpg">
     <script type="application/ld+json">
 {
@@ -105,10 +105,7 @@
                                             <li><a href="project.html">Showcase</a></li>
                                         </ul>
                                     </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link" href="pricing.html">Pricing</a>
-                                    </li>
-                                    <li class="nav-item">
+<li class="nav-item">
                                         <a class="nav-link" href="news.html">Journal</a>
                                     </li>
                                     <li class="nav-item has-dropdown">
@@ -117,14 +114,13 @@
                                         </a>
                                         <ul class="sub-menu list-unstyled">
                                             <li><a href="about.html">About</a></li>
-                                            <li><a href="team.html">Team</a></li>
-                                            <li><a href="faq.html">FAQ</a></li>
+<li><a href="faq.html">FAQ</a></li>
                                             <li><a href="contact.html">Contact</a></li>
                                         </ul>
                                     </li>
                                 </ul>
                                 <div class="menu-right-info">
-                                    <a class="sign-in-link" href="https://app.wiremark.net">Sign in</a>
+                                    <span class="wm-app-entry"><a class="sign-in-link" href="https://app.wiremark.net">Open the app</a><small class="wm-private-note">Needs our private network (Ziti)</small></span>
                                     <a class="theme-btn-main style-2" href="contact.html">
                                         <span class="theme-btn-arrow-left"> <i class="fa-solid fa-up-right-from-square"></i> </span>
                                         <span class="theme-btn">Request access</span>
@@ -180,16 +176,14 @@
                                             <li><a href="project.html">Showcase</a></li>
                                         </ul>
                                     </li>
-                                    <li><a href="pricing.html">Pricing</a></li>
-                                    <li><a href="news.html">Journal</a></li>
+<li><a href="news.html">Journal</a></li>
                                     <li class="sub-mobile-menu has-dropdown">
                                         <a href="javascript:void(0)">
                                             Company <i class="fas fa-chevron-down float-end"></i>
                                         </a>
                                         <ul class="list-unstyled">
                                             <li><a href="about.html">About</a></li>
-                                            <li><a href="team.html">Team</a></li>
-                                            <li><a href="faq.html">FAQ</a></li>
+<li><a href="faq.html">FAQ</a></li>
                                             <li><a href="contact.html">Contact</a></li>
                                         </ul>
                                     </li>
@@ -202,7 +196,7 @@
                                 <div class="contact-details">
                                     <span class="sub-info">Access</span>
                                     <p>
-                                        <a href="https://app.wiremark.net">app.wiremark.net</a>
+                                        <a href="https://app.wiremark.net">app.wiremark.net</a><small class="wm-private-note">Needs our private network (Ziti)</small>
                                     </p>
                                 </div>
                                 <div class="contact-details">
@@ -353,7 +347,7 @@
                                                 <div class="acc-content">
                                                     <div class="content">
                                                         <div class="text">
-                                                            Access is invite-gated while we scale. Request access and you'll start free on the Starter plan, then upgrade as your team grows.
+                                                            Access is invite-gated while we scale. Request access by email and the WireMark team will be in touch. The app runs on our private network, so access includes a Ziti identity.
                                                         </div>
                                                     </div>
                                                 </div>
@@ -369,27 +363,13 @@
                                                 <div class="acc-content">
                                                     <div class="content">
                                                         <div class="text">
-                                                            Yes — BYOK keeps AI inference on your own account, so you control spend and the plan price stays lean. Hosted bundles inference into the plan, and WireMark manages it for you. Both modes are available on Starter, Pro, Team, and Enterprise.
+                                                            Yes. BYOK keeps AI inference on your own account and your own key. In hosted mode WireMark manages inference for you. Both modes run the same observe-to-verify loop.
                                                         </div>
                                                     </div>
                                                 </div>
                                             </li>
 
-                                            <!--Block-->
-                                            <li class="accordion block wow animate__fadeInUp" data-wow-delay="1.2s">
-                                                <div class="acc-btn">
-                                                    <div class="number"> 07.</div>
-                                                How does the AI credit allowance work?
-                                                    <div class="icon fa-regular fa-plus"></div>
-                                                </div>
-                                                <div class="acc-content">
-                                                    <div class="content">
-                                                        <div class="text">
-                                                            Hosted plans include a monthly credit allowance (1 credit ≈ $0.01); the cap pauses usage and resets monthly. You can buy more credits at cost, and BYOK plans bill inference to your own key instead.
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </li>
+
                                         </ul>
                                     </div>
                                 </div>
@@ -406,9 +386,9 @@
                                 </h2>
                                 <div class="right-content wow animate__fadeInUp" data-wow-delay=".3s">
                                     <p class="mb-2">
-                                        Start free on the Starter plan — upgrade as your team grows.
+                                        Request access and the WireMark team will be in touch.
                                     </p>
-                                    <a href="pricing.html" class="theme-btn-main style-2">
+                                    <a href="contact.html" class="theme-btn-main style-2">
                                         <span class="theme-btn-arrow-left"> <i class="fa-solid fa-up-right-from-square"></i> </span>
                                         <span class="theme-btn">Get started</span>
                                         <span class="theme-btn-arrow-right"> <i class="fa-solid fa-up-right-from-square"></i> </span>
@@ -448,12 +428,7 @@
                                                            Contact us
                                                         </a>
                                                     </li>
-                                                    <li>
-                                                        <a href="team.html">
-                                                            Our team
-                                                        </a>
-                                                    </li>
-                                                    <li>
+<li>
                                                         <a href="contact.html">
                                                             Careers
                                                         </a>
@@ -522,7 +497,7 @@
                                                 </div>
                                                 <ul class="contact-list">
                                                     <li>
-                                                        <a href="https://app.wiremark.net">Request access</a>
+                                                        <a href="mailto:info@wiremark.net?subject=WireMark%20access">Request access</a>
                                                     </li>
                                                     <li>
                                                         <img src="assets/img/home-1/email.png" loading="lazy" decoding="async" alt="">

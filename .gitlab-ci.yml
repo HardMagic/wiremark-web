@@ -13,3 +13,25 @@ include:
 variables:
   GITHUB_REPO: "HardMagic/wiremark-web"
   GITHUB_MIRROR_EXTERNAL: "true"
+  # Publish only the allow-listed site files (scripts/build-site.sh), never the
+  # repository root: the same set GitHub Pages serves and the gate checks.
+  SITE_DIR: "_site"
+  BUILD_COMMANDS: "sh scripts/build-site.sh _site"
+
+# Public-surface gate (wiremark/ops#21): wiremark.net is the only public
+# Wiremark surface and shows features only; every app stays on Ziti. Fails on a
+# password field or form, an internal hostname, a price, an app.wiremark.net
+# link without the private-network note, or any other *.wiremark.net name.
+# The self-test proves each rule still trips on its fixture in
+# tests/public-surface/. It has no rules, so it runs in every pipeline,
+# Draft MRs included.
+public-surface:
+  stage: preflight
+  needs: []
+  interruptible: true
+  # renovate: datasource=docker depName=node
+  image: harbor.focuscell.org/dockerhub-proxy/library/node:26.13.1-alpine@sha256:6bd9ab43c0ec0190ca7b2d193906cb8b7edf6e7f4afa43ddeccd6452710bffb5
+  script:
+    - node scripts/check-public-surface.mjs --self-test
+    - sh scripts/build-site.sh _site
+    - node scripts/check-public-surface.mjs _site

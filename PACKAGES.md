@@ -31,7 +31,7 @@ Site build date: 2026-08-05. Posture-up date: 2026-08-06.
 
 | Old plugin | Was | Now | Live usage |
 |---|---|---|---|
-| WOW.js | jQuery scroll-reveal | **IntersectionObserver** (first-party in `main.js`) | 55 `wow animate__fadeInUp` elements, all 19 pages |
+| WOW.js | jQuery scroll-reveal | **IntersectionObserver** (first-party in `main.js`) | 55 `wow animate__fadeInUp` elements, all 16 pages |
 | magnific-popup | jQuery lightbox | **GLightbox 3.3.1** | 1 `.video-popup` (index-2); `.img-popup` markup absent (dead) |
 | ripple-2.js | jQuery WebGL water-ripple | **removed** | 2 `.ripple-image`, decorative gimmick; bg already set in `main.js` before the old `.ripples()` call — zero visual regression |
 | counterup + waypoints | jQuery scroll count-up | **GSAP ScrollTrigger tween** (in `main.js`) | `.count` markup absent on all pages |
