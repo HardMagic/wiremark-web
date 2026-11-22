@@ -13,9 +13,20 @@
 //   app-link-note    a link to app.wiremark.net without the private-network
 //                    note ("private network") right next to it
 //   subdomain-link   any *.wiremark.net name other than app.wiremark.net
+//   cdn-cgi          a Cloudflare edge rewrite: a /cdn-cgi/ path (Email
+//                    Obfuscation's /cdn-cgi/l/email-protection links and its
+//                    decoder script) or its data-cfemail / __cf_email__
+//                    markup. The source has plain mailto: links; these only
+//                    appear when a proxied Cloudflare zone rewrites the page,
+//                    and without JavaScript every such link is a 404
+//                    (wiremark/ops#20).
 //
 // Usage:
 //   node scripts/check-public-surface.mjs [dir]   scan dir (default _site)
+//   node scripts/check-public-surface.mjs --live [base-url]
+//       fetch base-url (default https://<CNAME>/), robots.txt, sitemap.xml and
+//       every page the sitemap lists, and run the same rules on what the public
+//       is served. Catches edge rewrites that never exist in the built files.
 //   node scripts/check-public-surface.mjs --self-test
 //       run the rules against tests/public-surface/: every bad-<rule>*.html
 //       must trip <rule>, every good*.html must pass.
@@ -54,6 +65,13 @@ const PRICE = [
 ];
 
 const SUBDOMAIN = /\b((?:[a-z0-9-]+\.)+)wiremark\.net\b/gi;
+// Cloudflare edge rewrites (wiremark/ops#20). Checked on the raw text, so the
+// decoder <script src="/cdn-cgi/..."> counts too.
+const CDN_CGI = [
+  /\/cdn-cgi\//gi,
+  /\bdata-cfemail\b/gi,
+  /\b__cf_email__\b/gi,
+];
 const APP_HREF = /<a\b[^>]*\bhref\s*=\s*["']?https?:\/\/app\.wiremark\.net[^>]*>/gi;
 
 function lineOf(text, index) {
@@ -86,6 +104,9 @@ export function scanText(rel, text) {
   for (const m of text.matchAll(SUBDOMAIN)) {
     const host = (m[1] + 'wiremark.net').toLowerCase();
     if (host !== 'app.wiremark.net') add('subdomain-link', m.index, host);
+  }
+  for (const re of CDN_CGI) {
+    for (const m of text.matchAll(re)) add('cdn-cgi', m.index);
   }
 
   if (!HTML_EXT.has(ext)) return found;
@@ -133,6 +154,52 @@ function report(violations) {
   for (const v of violations) console.log(v.file + ':' + v.line + '  ' + v.rule + '  ' + v.msg);
 }
 
+const FETCH_TIMEOUT_MS = 20000;
+
+async function fetchText(url) {
+  let res;
+  try {
+    res = await fetch(url, { redirect: 'follow', signal: AbortSignal.timeout(FETCH_TIMEOUT_MS), headers: { 'user-agent': 'wiremark-public-surface-check' } });
+  } catch (err) {
+    const why = err && err.cause && err.cause.code ? err.cause.code : (err && err.name) + ': ' + (err && err.message);
+    throw new Error('GET ' + url + ' failed: ' + why);
+  }
+  if (!res.ok) throw new Error('GET ' + url + ' answered HTTP ' + res.status);
+  return res.text();
+}
+
+// The published page set is sitemap.xml: fetch the home page, robots.txt, the
+// sitemap and every <loc> on the base host, and scan each response body.
+export async function scanLive(base) {
+  const origin = new URL(base);
+  const sitemapUrl = new URL('/sitemap.xml', origin).href;
+  const sitemap = await fetchText(sitemapUrl);
+  const urls = new Set([new URL('/', origin).href, new URL('/robots.txt', origin).href]);
+  for (const m of sitemap.matchAll(/<loc>\s*([^<\s]+)\s*<\/loc>/gi)) {
+    const u = new URL(m[1], origin);
+    if (u.host !== origin.host) throw new Error('sitemap.xml lists ' + u.href + ', which is not on ' + origin.host);
+    urls.add(u.href);
+  }
+  if (urls.size < 3) throw new Error(sitemapUrl + ' lists no pages');
+  const violations = scanText('sitemap.xml', sitemap).map(v => ({ ...v, file: sitemapUrl }));
+  for (const url of urls) {
+    const u = new URL(url);
+    let rel = u.pathname.replace(/^\//, '') || 'index.html';
+    if (rel.endsWith('/')) rel += 'index.html';
+    violations.push(...scanText(rel, await fetchText(url)).map(v => ({ ...v, file: url })));
+  }
+  return { scanned: urls.size + 1, violations };
+}
+
+function summarize(scanned, violations, unit) {
+  report(violations);
+  const byRule = {};
+  for (const v of violations) byRule[v.rule] = (byRule[v.rule] || 0) + 1;
+  console.log('check-public-surface: ' + scanned + ' ' + unit + ' scanned, ' + violations.length + ' violations' +
+    (violations.length ? ' ' + JSON.stringify(byRule) : ''));
+  return violations.length ? 1 : 0;
+}
+
 function selfTest(root) {
   const dir = path.join(root, 'tests', 'public-surface');
   if (!fs.existsSync(dir)) { console.error('self-test: missing ' + dir); return 2; }
@@ -158,25 +225,35 @@ function selfTest(root) {
   return failed ? 1 : 0;
 }
 
-function main(argv) {
+async function main(argv) {
   const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
   if (argv[0] === '--self-test') return selfTest(root);
-  if (argv[0] === '-h' || argv[0] === '--help') { console.log('usage: check-public-surface.mjs [dir] | --self-test'); return 0; }
+  if (argv[0] === '-h' || argv[0] === '--help') { console.log('usage: check-public-surface.mjs [dir] | --live [base-url] | --self-test'); return 0; }
+  if (argv[0] === '--live') {
+    let base = argv[1];
+    if (!base) {
+      const apex = fs.readFileSync(path.join(root, 'CNAME'), 'utf8').trim();
+      if (!apex) { console.error('check-public-surface: CNAME is empty and no base URL was given'); return 2; }
+      base = 'https://' + apex + '/';
+    }
+    try { new URL(base); } catch { console.error('check-public-surface: --live needs an absolute URL, got ' + base); return 2; }
+    let result;
+    try { result = await scanLive(base); }
+    catch (err) { console.error('check-public-surface: ' + err.message); return 2; }
+    return summarize(result.scanned, result.violations, 'URLs');
+  }
   const dir = path.resolve(argv[0] || '_site');
   if (!fs.existsSync(dir) || !fs.statSync(dir).isDirectory()) {
     console.error('check-public-surface: ' + dir + ' is not a directory (run sh scripts/build-site.sh first)');
     return 2;
   }
   const { scanned, violations } = scanDir(dir);
-  report(violations);
-  const byRule = {};
-  for (const v of violations) byRule[v.rule] = (byRule[v.rule] || 0) + 1;
-  console.log('check-public-surface: ' + scanned + ' files scanned, ' + violations.length + ' violations' +
-    (violations.length ? ' ' + JSON.stringify(byRule) : ''));
-  return violations.length ? 1 : 0;
+  return summarize(scanned, violations, 'files');
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  try { process.exitCode = main(process.argv.slice(2)); }
-  catch (err) { console.error('check-public-surface: ' + ((err && err.stack) || err)); process.exitCode = 2; }
+  main(process.argv.slice(2)).then(
+    code => { process.exitCode = code; },
+    err => { console.error('check-public-surface: ' + ((err && err.stack) || err)); process.exitCode = 2; },
+  );
 }

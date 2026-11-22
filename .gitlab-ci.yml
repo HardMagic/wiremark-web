@@ -21,7 +21,9 @@ variables:
 # Public-surface gate (wiremark/ops#21): wiremark.net is the only public
 # Wiremark surface and shows features only; every app stays on Ziti. Fails on a
 # password field or form, an internal hostname, a price, an app.wiremark.net
-# link without the private-network note, or any other *.wiremark.net name.
+# link without the private-network note, any other *.wiremark.net name, or a
+# Cloudflare /cdn-cgi/ rewrite (wiremark/ops#20; the live run of the same rules
+# is in .github/workflows/pages.yml).
 # The self-test proves each rule still trips on its fixture in
 # tests/public-surface/. It has no rules, so it runs in every pipeline,
 # Draft MRs included.
