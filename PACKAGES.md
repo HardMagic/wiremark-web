@@ -43,7 +43,7 @@ Site build date: 2026-08-05. Posture-up date: 2026-08-06.
 | File | Why |
 |---|---|
 | `bootstrap.bundle.min.js` | Bootstrap's own bundled JS (offcanvas, collapse, etc.) — standalone, no jQuery. |
-| `distortion-img-depend.js` | Runtime dependency of the live `distortion-img.js` ES module (WebGL image-distortion on `.image-distortion`). |
+| `distortion-img-depend.js` | Runtime dependency of the live `distortion-img.js` ES module (WebGL image-distortion on `.image-distortion`). Since wiremark/site#5 `distortion-img.js` draws on demand: once when the image loads, then only while the flow settles after pointer movement; it starts near the viewport, pauses off screen, uses a 128 Flowmap (OGL default) and shows the plain background with `prefers-reduced-motion` or without WebGL. `scripts/check-hero-idle.mjs` proves it in CI (`hero-idle`). |
 | `main.css.map` | Sourcemap for `main.css`; harmless. |
 
 ## Notes for the copywriter
