@@ -80,11 +80,29 @@ function serve() {
 }
 
 // Runs in the page before any site script: record every long task.
+// Long animation frames name the scripts behind a long task.
 function recordLongTasks() {
   window.__longTasks = [];
+  window.__longFrames = [];
   new PerformanceObserver((list) => {
     for (const e of list.getEntries()) window.__longTasks.push({ start: Math.round(e.startTime), duration: Math.round(e.duration) });
   }).observe({ type: 'longtask', buffered: true });
+  try {
+    new PerformanceObserver((list) => {
+      for (const e of list.getEntries()) {
+        window.__longFrames.push({
+          start: Math.round(e.startTime),
+          duration: Math.round(e.duration),
+          blocking: Math.round(e.blockingDuration),
+          render: Math.round(e.renderStart ? e.startTime + e.duration - e.renderStart : 0),
+          style: Math.round(e.styleAndLayoutStart ? e.startTime + e.duration - e.styleAndLayoutStart : 0),
+          scripts: e.scripts.map((s) => `${s.invokerType} ${s.invoker} ${(s.sourceURL || '').split('/').pop()}:${s.sourceFunctionName || '?'} ${Math.round(s.duration)}ms`),
+        });
+      }
+    }).observe({ type: 'long-animation-frame', buffered: true });
+  } catch (error) {
+    window.__longFramesError = String(error);
+  }
 }
 
 // Runs in the page before any site script: a browser without WebGL.
@@ -130,9 +148,10 @@ async function idleWindow(page, label, failures) {
   await page.waitForTimeout(IDLE_WINDOW_MS);
   const after = await effects(page);
   const longTasks = await page.evaluate((t) => window.__longTasks.filter((e) => e.start >= t), t0);
+  const longFrames = await page.evaluate((t) => window.__longFrames.filter((e) => e.start + e.duration >= t && e.blocking > 0), t0);
   const framesInWindow = after.reduce((n, e, i) => n + e.frames - before[i].frames, 0);
   const running = after.filter((e) => e.state === 'running').length;
-  if (longTasks.length) failures.push(`${label}: ${longTasks.length} long task(s) while idle: ${JSON.stringify(longTasks)}`);
+  if (longTasks.length) failures.push(`${label}: ${longTasks.length} long task(s) while idle: ${JSON.stringify(longTasks)}; long animation frames: ${JSON.stringify(longFrames)}`);
   if (framesInWindow) failures.push(`${label}: ${framesInWindow} frame(s) drawn while nothing moved (rAF did not stop)`);
   if (running) failures.push(`${label}: ${running} effect(s) still running while idle`);
   return { windowMs: IDLE_WINDOW_MS, longTasks: longTasks.length, framesInWindow, states: after.map((e) => e.state) };
@@ -148,11 +167,22 @@ async function hover(page, index, failures, label) {
     return { left: r.left, width: r.width, y: (top + bottom) / 2 };
   }, index);
   const before = (await effects(page))[index].frames;
-  await page.mouse.move(box.left + box.width * 0.25, box.y);
+  const x0 = box.left + box.width * 0.25;
+  const hit = await page.evaluate(({ i, x, y }) => {
+    const el = document.querySelectorAll('.image-distortion')[i];
+    const top = document.elementFromPoint(x, y);
+    window.__pointerMoves = 0;
+    el.addEventListener('pointermove', () => { window.__pointerMoves += 1; });
+    return { inside: !!top && el.contains(top), top: top ? top.tagName + '.' + String(top.className).split(' ').join('.') : null };
+  }, { i: index, x: x0, y: box.y });
+  await page.mouse.move(x0, box.y);
   await page.mouse.move(box.left + box.width * 0.75, box.y + 40, { steps: 25 });
+  // Give the loop a few frames to start.
+  await page.waitForTimeout(200);
   const during = (await effects(page))[index];
+  const pointerMoves = await page.evaluate(() => window.__pointerMoves);
   const restarted = during.frames > before;
-  if (!restarted) failures.push(`${label}: pointer movement drew no frame (the loop did not restart)`);
+  if (!restarted) failures.push(`${label}: pointer movement drew no frame (the loop did not restart; ${pointerMoves} pointermove events reached the effect, topmost element ${JSON.stringify(hit)}, state ${during.state})`);
   const t0 = Date.now();
   await settled(page);
   const settleMs = Date.now() - t0;
