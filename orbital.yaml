@@ -15,8 +15,8 @@ gitlab:
       short: site
 
 # Static HTML and CSS with vendored JavaScript and the Playwright checks
-# (*.mjs). Python is never listed: scripts/subset-fontawesome.py predates the
-# group rule and is not a declared language.
+# (*.mjs). No Python (wiremark/ops#6): the Font Awesome subset is regenerated
+# with C tools, see PACKAGES.md (wiremark/site#9).
 stack:
   languages: [javascript]
 
