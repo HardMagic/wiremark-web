@@ -30,6 +30,9 @@ const PAGES = ['index-2.html', 'index-3.html'];
 const IDLE_WINDOW_MS = 3000;
 const SETTLE_TIMEOUT_MS = 30000;
 const HOVER_SETTLE_TIMEOUT_MS = 120000;
+const QUIET_GRACE_MS = 2000;
+// Scripts of the WebGL effect, as long animation frames name them.
+const EFFECT_SCRIPT = /distortion-img/;
 const VIEWPORT = { width: 1280, height: 800 };
 // Software WebGL in headless Chromium; Chromium no longer falls back to
 // SwiftShader for WebGL on its own.
@@ -197,21 +200,34 @@ async function idleWindow(page, label, failures, { report = false } = {}) {
   if (report) failures = [];
   else {
     await setPageAnimation(page, false);
-    await page.waitForTimeout(500); // let frames already in flight finish
+    // Let frames in flight and scroll-triggered work (ScrollTrigger's own
+    // requestAnimationFrame after a scroll) finish before the window opens.
+    await page.waitForTimeout(QUIET_GRACE_MS);
   }
   const before = await effects(page);
   const t0 = await page.evaluate(() => performance.now());
   await page.waitForTimeout(IDLE_WINDOW_MS);
   const after = await effects(page);
-  const longTasks = await page.evaluate((t) => window.__longTasks.filter((e) => e.start >= t), t0);
+  const allLongTasks = await page.evaluate((t) => window.__longTasks.filter((e) => e.start >= t), t0);
   const longFrames = await page.evaluate((t) => window.__longFrames.filter((e) => e.start + e.duration >= t), t0);
+  // A long task inside a long animation frame whose scripts are all someone
+  // else's (GSAP, Swiper) is the page's, not the effect's: report it, do not
+  // fail on it. One the effect's script ran in, or that nothing names, fails.
+  const owner = (task) => {
+    const frames = longFrames.filter((f) => task.start < f.start + f.duration && f.start < task.start + task.duration);
+    const scripts = frames.flatMap((f) => f.scripts);
+    if (scripts.some((s) => EFFECT_SCRIPT.test(s))) return 'effect';
+    return scripts.length ? 'page' : 'unattributed';
+  };
+  const longTasks = allLongTasks.filter((t) => owner(t) !== 'page');
+  const pageLongTasks = allLongTasks.filter((t) => owner(t) === 'page');
   const framesInWindow = after.reduce((n, e, i) => n + e.frames - before[i].frames, 0);
   const running = after.filter((e) => e.state === 'running').length;
   if (longTasks.length) failures.push(`${label}: ${longTasks.length} long task(s) while idle: ${JSON.stringify(longTasks)}; long animation frames: ${JSON.stringify(longFrames)}`);
   if (framesInWindow) failures.push(`${label}: ${framesInWindow} frame(s) drawn while nothing moved (rAF did not stop)`);
   if (running) failures.push(`${label}: ${running} effect(s) still running while idle`);
   if (!report) await setPageAnimation(page, true);
-  return { windowMs: IDLE_WINDOW_MS, longTasks: longTasks.length, longTaskMs: longTasks.map((e) => e.duration), framesInWindow, states: after.map((e) => e.state), longFrames };
+  return { windowMs: IDLE_WINDOW_MS, longTasks: report ? allLongTasks.length : longTasks.length, longTaskMs: (report ? allLongTasks : longTasks).map((e) => e.duration), pageLongTasks: report ? [] : pageLongTasks, framesInWindow, states: after.map((e) => e.state), longFrames };
 }
 
 async function hover(page, index, failures, label) {
@@ -346,8 +362,9 @@ const failures = results.flatMap((r) => r.failures);
 for (const r of results) {
   console.log(`${r.failures.length ? 'FAIL' : 'PASS'} ${r.page}`);
   if (r.webgl !== undefined) console.log(`  webgl: ${r.webgl}`);
-  if (r.load) console.log(`  after load:   ${r.load.windowMs} ms, ${r.load.longTasks} long tasks, ${r.load.framesInWindow} frames, states ${r.load.states.join(',')}`);
-  if (r.scrolled) console.log(`  after scroll: ${r.scrolled.windowMs} ms, ${r.scrolled.longTasks} long tasks, ${r.scrolled.framesInWindow} frames, frames drawn per effect ${r.effects.map((e) => e.frames).join(',')}`);
+  const page = (w) => (w.pageLongTasks.length ? ` (+${w.pageLongTasks.length} long task(s) of other scripts: ${JSON.stringify(w.longFrames.filter((f) => f.scripts.length).flatMap((f) => f.scripts))})` : '');
+  if (r.load) console.log(`  after load:   ${r.load.windowMs} ms, ${r.load.longTasks} long tasks, ${r.load.framesInWindow} frames, states ${r.load.states.join(',')}${page(r.load)}`);
+  if (r.scrolled) console.log(`  after scroll: ${r.scrolled.windowMs} ms, ${r.scrolled.longTasks} long tasks, ${r.scrolled.framesInWindow} frames, frames drawn per effect ${r.effects.map((e) => e.frames).join(',')}${page(r.scrolled)}`);
   if (r.hover) console.log(`  hover: restarted ${r.hover.restarted} (${r.hover.framesDuringHover} frames), settled in ${r.hover.settleMs} ms, then ${r.hover.quiet.longTasks} long tasks and ${r.hover.quiet.framesInWindow} frames in ${r.hover.quiet.windowMs} ms`);
   if (r['reduced-motion']) console.log(`  reduced motion: ${r['reduced-motion'].join(',')}`);
   if (r['no-webgl']) console.log(`  no WebGL: ${r['no-webgl'].join(',')}`);
