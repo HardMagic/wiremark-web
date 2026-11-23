@@ -292,6 +292,14 @@ async function checkPage(browser, base, name) {
     const count = (await effects(page)).length;
     for (let i = 0; i < count; i++) await scrollTo(page, i);
     await step('first frames after scrolling', () => settled(page));
+    // Scrolling starts lazy images loading: let the page finish loading them
+    // (network idle, every loaded image decoded) before the window opens.
+    await step('lazy images after scrolling', async () => {
+      await page.waitForLoadState('networkidle', { timeout: SETTLE_TIMEOUT_MS });
+      await page.evaluate(() => Promise.all([...document.images]
+        .filter((img) => img.complete && img.naturalWidth)
+        .map((img) => img.decode().catch(() => undefined))));
+    });
     const all = await effects(page);
     result.effects = all;
     all.forEach((e, i) => {
