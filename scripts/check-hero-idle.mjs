@@ -128,33 +128,65 @@ const settled = (page) => page.waitForFunction(() =>
     .every((el) => !['loading', 'running'].includes(el.dataset.distortion)),
   null, { timeout: SETTLE_TIMEOUT_MS, polling: 100 });
 
-async function scrollTo(page, index) {
-  await page.evaluate((i) => {
-    const el = document.querySelectorAll('.image-distortion')[i];
-    const smoother = window.ScrollSmoother && window.ScrollSmoother.get();
-    if (smoother) smoother.scrollTo(el, false, 'center center');
-    else el.scrollIntoView({ block: 'center' });
-  }, index);
-  await page.waitForFunction((i) => {
-    const s = document.querySelectorAll('.image-distortion')[i].dataset.distortion;
-    return s === 'idle' || s === 'fallback' || s === 'static';
-  }, index, { timeout: SETTLE_TIMEOUT_MS, polling: 100 });
+// Name the step a failure happened in.
+async function step(name, fn) {
+  try {
+    return await fn();
+  } catch (error) {
+    throw new Error(`${name}: ${error.message.split('\n')[0]}`);
+  }
 }
 
+// Scroll an effect into view (through ScrollSmoother where the page has one,
+// which eases the content after the scroll position) and wait until it is on
+// screen and has drawn, or shows its plain background.
+async function scrollTo(page, index) {
+  await step(`scroll to effect ${index}`, async () => {
+    await page.evaluate((i) => {
+      const el = document.querySelectorAll('.image-distortion')[i];
+      const smoother = window.ScrollSmoother && window.ScrollSmoother.get();
+      if (smoother) smoother.scrollTo(el, false, 'center center');
+      else el.scrollIntoView({ block: 'center' });
+    }, index);
+    await page.waitForFunction((i) => {
+      const r = document.querySelectorAll('.image-distortion')[i].getBoundingClientRect();
+      return r.bottom > 80 && r.top < window.innerHeight - 80;
+    }, index, { timeout: SETTLE_TIMEOUT_MS, polling: 100 });
+    await page.waitForFunction((i) => {
+      const s = document.querySelectorAll('.image-distortion')[i].dataset.distortion;
+      return s === 'idle' || s === 'fallback' || s === 'static';
+    }, index, { timeout: SETTLE_TIMEOUT_MS, polling: 100 });
+  });
+}
+
+// The carousels change slides every 2-4 s (main.js, Swiper autoplay). Stop
+// them to measure what the WebGL effect leaves on the main thread.
+const setCarousels = (page, run) => page.evaluate((on) => {
+  let n = 0;
+  document.querySelectorAll('.swiper, .swiper-container').forEach((el) => {
+    const autoplay = el.swiper && el.swiper.autoplay;
+    if (!autoplay) return;
+    if (on) autoplay.start(); else autoplay.stop();
+    n += 1;
+  });
+  return n;
+}, run);
+
 // Watch a quiet window: no long task starts in it and no effect draws a frame.
-async function idleWindow(page, label, failures) {
+async function idleWindow(page, label, failures, { report = false } = {}) {
+  if (report) failures = [];
   const before = await effects(page);
   const t0 = await page.evaluate(() => performance.now());
   await page.waitForTimeout(IDLE_WINDOW_MS);
   const after = await effects(page);
   const longTasks = await page.evaluate((t) => window.__longTasks.filter((e) => e.start >= t), t0);
-  const longFrames = await page.evaluate((t) => window.__longFrames.filter((e) => e.start + e.duration >= t && e.blocking > 0), t0);
+  const longFrames = await page.evaluate((t) => window.__longFrames.filter((e) => e.start + e.duration >= t), t0);
   const framesInWindow = after.reduce((n, e, i) => n + e.frames - before[i].frames, 0);
   const running = after.filter((e) => e.state === 'running').length;
   if (longTasks.length) failures.push(`${label}: ${longTasks.length} long task(s) while idle: ${JSON.stringify(longTasks)}; long animation frames: ${JSON.stringify(longFrames)}`);
   if (framesInWindow) failures.push(`${label}: ${framesInWindow} frame(s) drawn while nothing moved (rAF did not stop)`);
   if (running) failures.push(`${label}: ${running} effect(s) still running while idle`);
-  return { windowMs: IDLE_WINDOW_MS, longTasks: longTasks.length, framesInWindow, states: after.map((e) => e.state) };
+  return { windowMs: IDLE_WINDOW_MS, longTasks: longTasks.length, longTaskMs: longTasks.map((e) => e.duration), framesInWindow, states: after.map((e) => e.state), longFrames };
 }
 
 async function hover(page, index, failures, label) {
@@ -184,7 +216,7 @@ async function hover(page, index, failures, label) {
   const restarted = during.frames > before;
   if (!restarted) failures.push(`${label}: pointer movement drew no frame (the loop did not restart; ${pointerMoves} pointermove events reached the effect, topmost element ${JSON.stringify(hit)}, state ${during.state})`);
   const t0 = Date.now();
-  await settled(page);
+  await step('settle after hover', () => settled(page));
   const settleMs = Date.now() - t0;
   const quiet = await idleWindow(page, `${label} after hover`, failures);
   return { restarted, framesDuringHover: during.frames - before, settleMs, quiet };
@@ -204,7 +236,8 @@ async function checkPage(browser, base, name) {
     await page.addInitScript(recordLongTasks);
     const resp = await page.goto(base + name, { waitUntil: 'load', timeout: 60000 });
     if (!resp || resp.status() !== 200) failures.push(`${name}: HTTP ${resp ? resp.status() : 'no response'}`);
-    await settled(page);
+    await step('first frames after load', () => settled(page));
+    result.carousels = await setCarousels(page, false);
     result.webgl = await page.evaluate(() => {
       const gl = document.createElement('canvas').getContext('webgl');
       return gl ? gl.getParameter(gl.VERSION) : null;
@@ -213,7 +246,7 @@ async function checkPage(browser, base, name) {
 
     const count = (await effects(page)).length;
     for (let i = 0; i < count; i++) await scrollTo(page, i);
-    await settled(page);
+    await step('first frames after scrolling', () => settled(page));
     const all = await effects(page);
     result.effects = all;
     all.forEach((e, i) => {
@@ -223,6 +256,9 @@ async function checkPage(browser, base, name) {
     });
     result.scrolled = await idleWindow(page, `${name} after scrolling every effect into view`, failures);
     result.hover = await hover(page, 0, failures, `${name} hover`);
+    // Evidence only: the same window with the carousels running.
+    await setCarousels(page, true);
+    result.withCarousels = await idleWindow(page, `${name} with carousels`, failures, { report: true });
     result.longTasksBeforeIdle = await page.evaluate(() => window.__longTasks.length);
     if (errors.length) failures.push(...errors.map((e) => `${name}: ${e}`));
     await context.close();
@@ -235,6 +271,7 @@ async function checkPage(browser, base, name) {
   ]) {
     const context = await browser.newContext({ viewport: VIEWPORT, reducedMotion: mode === 'reduced-motion' ? 'reduce' : 'no-preference' });
     await setup(context);
+    await context.addInitScript(recordLongTasks);
     const page = await context.newPage();
     const errors = [];
     page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`));
@@ -250,6 +287,8 @@ async function checkPage(browser, base, name) {
     });
     if (errors.length) failures.push(...errors.map((e) => `${name} ${mode}: ${e}`));
     result[mode] = all.map((e) => e.state);
+    // Evidence only: long tasks of the page without the WebGL effect, carousels running.
+    result[mode + 'Idle'] = await idleWindow(page, `${name} ${mode}`, failures, { report: true });
     await context.close();
   }
 
@@ -283,6 +322,10 @@ for (const r of results) {
   if (r.hover) console.log(`  hover: restarted ${r.hover.restarted} (${r.hover.framesDuringHover} frames), settled in ${r.hover.settleMs} ms, then ${r.hover.quiet.longTasks} long tasks and ${r.hover.quiet.framesInWindow} frames in ${r.hover.quiet.windowMs} ms`);
   if (r['reduced-motion']) console.log(`  reduced motion: ${r['reduced-motion'].join(',')}`);
   if (r['no-webgl']) console.log(`  no WebGL: ${r['no-webgl'].join(',')}`);
+  if (r.carousels !== undefined) console.log(`  carousels: ${r.carousels} autoplaying, stopped for the checks above`);
+  for (const [label, w] of [['evidence, WebGL, carousels running', r.withCarousels], ['evidence, no WebGL, carousels running', r['no-webglIdle']], ['evidence, reduced motion, carousels running', r['reduced-motionIdle']]]) {
+    if (w) console.log(`  ${label}: ${w.longTasks} long tasks ${JSON.stringify(w.longTaskMs)} and ${w.framesInWindow} effect frames in ${w.windowMs} ms`);
+  }
   for (const f of r.failures) console.log(`  - ${f}`);
 }
 try {
