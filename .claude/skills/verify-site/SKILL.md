@@ -14,7 +14,7 @@ Playwright is installed. Browsers may need `npx playwright install chromium` if 
 
 ## Checks
 
-Build with `sh scripts/build-site.sh _site` and serve `_site/` (any static file server, e.g. `python3 -m http.server` or `npx serve`) and run Playwright against it. For each page in [`sitemap.xml`](../../../sitemap.xml) (all 15 live pages, plus `404.html`) verify:
+Build with `sh scripts/build-site.sh _site` and serve `_site/` (any static file server in Node, e.g. `npx serve`) and run Playwright against it. The WebGL hover effect has its own check, `node scripts/check-hero-idle.mjs _site` (it serves `_site` itself). For each page in [`sitemap.xml`](../../../sitemap.xml) (all 15 live pages, plus `404.html`) verify:
 
 1. **Loads** — HTTP 200, no navigational timeout.
 2. **No console errors** — assert zero `console.error` / uncaught page errors. (`new Swiper(...)` init failures and missing Splite/GSAP pieces surface here.)
