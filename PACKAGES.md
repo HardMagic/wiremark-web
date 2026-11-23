@@ -22,10 +22,65 @@ Site build date: 2026-08-05. Posture-up date: 2026-08-06.
 | Bootstrap | **5.3.8** | Latest stable (verified npm `latest`). `bootstrap.min.css` + `bootstrap.bundle.min.js` — standalone, no jQuery dependency. |
 | Swiper | **14.0.7** | Latest stable (2026-07-28). `swiper-bundle.min.js` + `swiper-bundle.min.css`. All carousels (hero, testimonials, team, brands, product-tour, mobile) verified in headless browser. |
 | GSAP + plugins | **3.15.0** | Latest stable. ScrollTrigger, ScrollSmoother, ScrollToPlugin, SplitText, TextPlugin — all free-tier (moved off Club in 3.13). Drives scroll reveals, smooth scrolling, text splits, panel pins. **Replaces the old WOW.js / jQuery reveal role.** |
-| Font Awesome | **Free 6.7.2** | Last 6.x (verified). 7.x exists but restructures the icon class system (416 `fa-solid` + 73 `fa-regular` usages) for no visual benefit — deliberate keep, documented. Replaced the template's Pro webfonts with the Free set. **`fa-solid-900.woff2` and `fa-regular-400.woff2` are subsets** with only the glyphs the pages use (the full fonts remain as the `.ttf` files, which browsers never load). After adding an icon to a page, run `python3 scripts/subset-fontawesome.py` (needs `fonttools` and `brotli`). |
+| Font Awesome | **Free 6.7.2** | Last 6.x (verified). 7.x exists but restructures the icon class system (416 `fa-solid` + 73 `fa-regular` usages) for no visual benefit — deliberate keep, documented. Replaced the template's Pro webfonts with the Free set. **`fa-solid-900.woff2` and `fa-regular-400.woff2` are subsets** with only the glyphs the pages use (the full fonts remain as the `.ttf` files, which browsers never load). Not built in CI: the subsets are committed, made and regenerated as in [Font Awesome subset](#font-awesome-subset) below. |
 | **GLightbox** | **3.3.1** | **New** (MIT, vanilla JS, ~11KB gz). Replaces magnific-popup for the live `.video-popup` (index-2) and future `.img-popup` galleries. `glightbox.min.js` + `glightbox.min.css`. The only newly-added dependency. |
 | three.js | — (removed) | The template's WebGL hero (`webgl.js`) was **dead code** — class never instantiated, target DOM (`#canvas-slider`, `.slide-img`) doesn't exist on any page. Removed `webgl.js`, `three.core.min.js`, `three.module.min.js` entirely. No r118 or 0.183 code ships. |
 | jQuery | **— (removed)** | **Dropped completely.** Every abandoned jQuery plugin was replaced or removed (see below), so no jQuery consumer remains. `main.js` and `distortion-img.js` rewritten to 100% vanilla JS. |
+
+## Font Awesome subset
+
+`assets/css/all.min.css` (Font Awesome Free 6.7.2, unchanged) declares every Font Awesome face with the
+`.woff2` first and the `.ttf` as fallback, so browsers load only the `.woff2` files. Two of them are
+subsets committed to git; nothing builds them, and `scripts/build-site.sh` copies them as they are:
+
+| File | Glyphs | Source |
+|---|---|---|
+| `assets/webfonts/fa-solid-900.woff2` | the codepoints below | `assets/webfonts/fa-solid-900.ttf` (full Free font) |
+| `assets/webfonts/fa-regular-400.woff2` | the codepoints below the regular face has | `assets/webfonts/fa-regular-400.ttf` (full Free font) |
+
+`fa-brands-400.woff2` and `fa-v4compatibility.woff2` are the stock Free files.
+
+**How it was made (2026-11, wiremark/site performance pass).** The codepoint set is the union of:
+
+1. every `fa-*` class in a `class="…"` attribute of a top-level `*.html` page or `assets/js/main.js`, mapped
+   to its codepoint through the `.fa-<name>{--fa:"\\<hex>"}` rules of `all.min.css` (the style classes
+   `fa-solid`, `fa-regular`, `fa-brands` have none);
+2. `fa-chevron-up` and `fa-chevron-down`, which `main.js` toggles at runtime;
+3. U+002B, U+F068 and U+F00D, the `::before` content of the accordion plus/minus and close rules in
+   `assets/css/main.css`.
+
+Both fonts were subset to that set as WOFF2 with every OpenType layout feature kept, hinting dropped and the
+`.notdef` outline kept (Chrome draws it for an icon the face lacks, as for the `fa-regular` icons the Free
+regular font does not ship). This was a fonttools script until wiremark/site#9 removed it
+(wiremark/ops#6: no Python in the Wiremark group). The set today, 16 codepoints for 15 classes
+(`fa-arrow-left/right/up`, `fa-check`, `fa-chevron-down/left/right/up`, `fa-circle-check`, `fa-envelope`,
+`fa-house`, `fa-plus`, `fa-star`, `fa-times`, `fa-up-right-from-square`):
+
+```
+U+002B,U+F005,U+F00C,U+F00D,U+F015,U+F053,U+F054,U+F058,U+F060,U+F061,U+F062,U+F068,U+F077,U+F078,U+F0E0,U+F35D
+```
+
+**Regenerate it** when a page or `main.js` starts using an icon outside that set (an icon missing from the
+subset renders as an empty box). The tools are HarfBuzz `hb-subset` and Google's `woff2_compress`, both C
+(Debian/Ubuntu: `apt install libharfbuzz-bin woff2`; no Python, no fonttools):
+
+```sh
+# 1. Icon classes in use (add fa-chevron-up/down; ignore fa-solid/fa-regular/fa-brands).
+grep -ohE "class\s*=\s*[\"'][^\"']*[\"']" *.html assets/js/main.js | grep -oE '\bfa-[a-z0-9-]+' | sort -u
+# 2. Codepoint of a class, e.g. fa-house -> "\f015" (a one-character value is the character itself).
+grep -oE '(\.fa-[a-z0-9-]+,)*\.fa-house[,{][^}]*\}' assets/css/all.min.css
+# 3. Subset both fonts to the old set plus the new codepoints.
+U='U+002B,U+F005,U+F00C,U+F00D,U+F015,U+F053,U+F054,U+F058,U+F060,U+F061,U+F062,U+F068,U+F077,U+F078,U+F0E0,U+F35D'
+tmp=$(mktemp -d)
+for f in fa-solid-900 fa-regular-400; do
+  hb-subset "assets/webfonts/$f.ttf" --unicodes="$U" --layout-features='*' --no-hinting --notdef-outline \
+    --output-file="$tmp/$f.ttf"
+  woff2_compress "$tmp/$f.ttf"            # writes $tmp/$f.woff2
+  cp "$tmp/$f.woff2" assets/webfonts/
+done
+```
+
+Then update the set above in this file, and check the new icon renders on its page (`/verify-site`).
 
 ## Replaced / removed jQuery plugins
 
