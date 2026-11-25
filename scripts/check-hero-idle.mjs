@@ -1,7 +1,9 @@
 #!/usr/bin/env node
-// Hero idle check (wiremark/site#5): the .image-distortion WebGL hover effect
-// must leave the main thread idle once it has drawn, and must stop its
-// requestAnimationFrame loop when nothing moves.
+// Hero idle check (wiremark/site#5, wiremark/site#6): once a hero page has
+// drawn and nothing moves, it stops producing frames. The .image-distortion
+// WebGL hover effect leaves the main thread idle and stops its
+// requestAnimationFrame loop, and the page's own animation (CSS keyframes,
+// carousels, GSAP) runs only where it can be seen (assets/js/idle-motion.js).
 //
 //   node scripts/check-hero-idle.mjs _site [--report .hero-idle/report.json]
 //
@@ -14,11 +16,19 @@
 //      same 3 s check;
 //   3. hover: pointer movement starts the loop, which stops by itself once the
 //      flow has settled, and leaves no long task behind;
-// The idle windows pause the page's own animation (carousels, GSAP ticker,
-// CSS keyframes) so they measure the effect alone; the same windows with that
-// animation running, with and without WebGL, are printed as evidence.
+// Every idle window runs with the page's own animation as it is; nothing is
+// paused for the check. In each, besides the effect:
+//   - no script requests frames in a loop (GSAP's ticker and ScrollTrigger's
+//     _rafBugFix sleep while the scroll is at rest);
+//   - every infinite CSS/Web animation off screen is paused, every one on
+//     screen runs (the look is unchanged), and autoplay carousels run only on
+//     screen;
+//   - long tasks, style recalculations and layouts are reported.
 //   4. prefers-reduced-motion: no canvas, plain background, state "static";
+//      no infinite animation and no carousel autoplay runs;
 //   5. no WebGL: no canvas, plain background, state "fallback", no error.
+// Runs 4 and 5 first print the window right after scrolling, as the
+// evidence of pipeline 166007 measured it (the before/after of site#6).
 // The page reports each effect's state in data-distortion and the frames it
 // drew in data-distortion-frames (assets/js/distortion-img.js).
 import { createServer } from 'node:http';
@@ -31,6 +41,9 @@ const IDLE_WINDOW_MS = 3000;
 const SETTLE_TIMEOUT_MS = 30000;
 const HOVER_SETTLE_TIMEOUT_MS = 120000;
 const QUIET_GRACE_MS = 2000;
+// More frame requests than this from one callback in an idle window is a loop
+// (60 Hz is 180 in 3 s; a carousel slide change asks for a few).
+const FRAME_LOOP_LIMIT = 20;
 // Scripts of the WebGL effect, as long animation frames name them.
 const EFFECT_SCRIPT = /distortion-img/;
 const VIEWPORT = { width: 1280, height: 800 };
@@ -110,6 +123,20 @@ function recordLongTasks() {
   } catch (error) {
     window.__longFramesError = String(error);
   }
+  // Every requestAnimationFrame request: the callback's name and the script
+  // that asked (the first one in the stack other than idle-motion.js, which
+  // only passes requests through). The callback itself is not wrapped, so
+  // long animation frames still name the script that runs it.
+  window.__frameRequests = [];
+  const requestFrame = window.requestAnimationFrame;
+  window.requestAnimationFrame = function requestAnimationFrame(callback) {
+    if (window.__frameRequests.length < 100000) {
+      const files = (new Error().stack || '').match(/[\w.-]+\.m?js(?=[?#:])/g) || [];
+      const source = files.find((f) => f !== 'idle-motion.js') || 'inline';
+      window.__frameRequests.push({ t: performance.now(), name: (callback && callback.name) || 'anonymous', source });
+    }
+    return requestFrame.call(window, callback);
+  };
 }
 
 // Runs in the page before any site script: a browser without WebGL.
@@ -166,58 +193,87 @@ async function scrollTo(page, index) {
   });
 }
 
-// The page has its own endless animation besides the WebGL effect: carousels
-// change slides every 2-4 s (Swiper autoplay), GSAP's ticker (ScrollSmoother,
-// ScrollTrigger) asks for a frame on every vsync, and CSS keyframes (marquees,
-// rotating shapes) and scroll reveals run on. In a software-GPU pod with one
-// CPU those make occasional long tasks with or without the WebGL effect (the
-// evidence lines measure that). The asserted windows pause them, so they
-// measure what the effect itself leaves on the main thread.
-const setPageAnimation = (page, run) => page.evaluate((on) => {
-  if (on) {
-    (window.__pausedAnimations || []).forEach((a) => a.play());
-    window.__pausedAnimations = [];
-  } else {
-    window.__pausedAnimations = document.getAnimations().filter((a) => a.playState === 'running');
-    window.__pausedAnimations.forEach((a) => a.pause());
+// The page's infinite CSS/Web animations and autoplay carousels, each with
+// whether it intersects the viewport, as an IntersectionObserver sees it (the
+// same test assets/js/idle-motion.js uses, so clipping counts alike).
+const motionCensus = (page) => page.evaluate(async () => {
+  const anims = document.getAnimations().filter((a) => a.effect && a.effect.target
+    && a.effect.getTiming().iterations === Infinity);
+  const carousels = [...document.querySelectorAll('.swiper, .swiper-container')]
+    .filter((el) => el.swiper && el.swiper.params && el.swiper.params.autoplay && el.swiper.params.autoplay.enabled);
+  const targets = [...new Set([...anims.map((a) => a.effect.target), ...carousels])];
+  const seen = new Map();
+  if (targets.length) {
+    await Promise.race([
+      new Promise((ok) => {
+        const io = new IntersectionObserver((entries) => {
+          entries.forEach((e) => seen.set(e.target, e.isIntersecting));
+          if (seen.size >= targets.length) { io.disconnect(); ok(); }
+        });
+        targets.forEach((t) => io.observe(t));
+      }),
+      new Promise((ok) => setTimeout(ok, 2000)),
+    ]);
   }
-  let carousels = 0;
-  document.querySelectorAll('.swiper, .swiper-container').forEach((el) => {
-    const autoplay = el.swiper && el.swiper.autoplay;
-    if (!autoplay) return;
-    if (on) autoplay.start(); else autoplay.stop();
-    carousels += 1;
-  });
-  const ticker = window.gsap && window.gsap.ticker;
-  if (ticker) {
-    if (on) ticker.wake(); else ticker.sleep();
-  }
-  return { carousels, gsapTicker: !!ticker, cssAnimations: on ? 0 : window.__pausedAnimations.length };
-}, run);
+  const where = (el) => (el.id ? '#' + el.id : el.tagName.toLowerCase() + (el.className && typeof el.className === 'string' ? '.' + el.className.trim().split(/\s+/).slice(0, 2).join('.') : ''));
+  return {
+    animations: anims.map((a) => ({
+      name: a.animationName || a.id || 'animation',
+      on: where(a.effect.target) + (a.effect.pseudoElement || ''),
+      state: a.playState,
+      inView: seen.get(a.effect.target) === true,
+      // Paused by the page's own CSS (animation-play-state), not by idle-motion.
+      cssPaused: /paused/.test(getComputedStyle(a.effect.target, a.effect.pseudoElement || null).animationPlayState || ''),
+    })),
+    carousels: carousels.map((el) => ({
+      on: where(el),
+      // idle-motion autoplays on its own timer (data-idle-autoplay); without it, Swiper's.
+      running: el.dataset.idleAutoplay ? el.dataset.idleAutoplay === 'on' : !!(el.swiper.autoplay.running && !el.swiper.autoplay.paused),
+      inView: seen.get(el) === true,
+    })),
+  };
+});
 
-// Watch a quiet window: no long task starts in it and no effect draws a frame.
-async function idleWindow(page, label, failures, { report = false } = {}) {
+const cdpMetrics = async (cdp) => Object.fromEntries((await cdp.send('Performance.getMetrics')).metrics.map((m) => [m.name, m.value]));
+
+// Watch a quiet window with the page's animation as it is: no script asks for
+// frames in a loop, the effect draws nothing and owns no long task, infinite
+// animations and carousels run on screen only (none under reduced motion).
+// report: evidence only, no grace and no assertions.
+async function idleWindow(page, cdp, label, failures, { report = false, reducedMotion = false } = {}) {
   if (report) failures = [];
-  else {
-    await setPageAnimation(page, false);
-    // Let frames in flight and scroll-triggered work (ScrollTrigger's own
-    // requestAnimationFrame after a scroll) finish before the window opens.
-    await page.waitForTimeout(QUIET_GRACE_MS);
-  }
+  // Let frames in flight, scroll-triggered work (ScrollTrigger's own
+  // requestAnimationFrame after a scroll) and the scroll smoother come to rest.
+  else await page.waitForTimeout(QUIET_GRACE_MS);
   const before = await effects(page);
   const t0 = await page.evaluate(() => performance.now());
+  const m0 = await cdpMetrics(cdp);
   await page.waitForTimeout(IDLE_WINDOW_MS);
+  const m1 = await cdpMetrics(cdp);
   const after = await effects(page);
+  const census = await motionCensus(page);
   const allLongTasks = await page.evaluate((t) => window.__longTasks.filter((e) => e.start >= t), t0);
   const longFrames = await page.evaluate((t) => window.__longFrames.filter((e) => e.start + e.duration >= t), t0);
+  const requests = await page.evaluate(({ t, ms }) => window.__frameRequests.filter((r) => r.t >= t && r.t < t + ms), { t: t0, ms: IDLE_WINDOW_MS });
+  const frameRequests = {};
+  for (const r of requests) {
+    const key = r.source + ':' + r.name;
+    frameRequests[key] = (frameRequests[key] || 0) + 1;
+  }
+  const metrics = {
+    recalcStyles: Math.round(m1.RecalcStyleCount - m0.RecalcStyleCount),
+    layouts: Math.round(m1.LayoutCount - m0.LayoutCount),
+    taskMs: Math.round((m1.TaskDuration - m0.TaskDuration) * 1000),
+    scriptMs: Math.round((m1.ScriptDuration - m0.ScriptDuration) * 1000),
+  };
   // Who owns a long task, from the long animation frames around it. The
   // effect only runs code in requestAnimationFrame, pointer, resize and
   // observer callbacks, all inside a frame, so its work is named there
   // (distortion-img*.js). A long task of other scripts (GSAP, Swiper) is the
   // page's; one in which no script ran is the browser's own (garbage
   // collection, decoding, IPC), which a one-CPU software-GPU pod shows now and
-  // then (main pipeline 166056). Only the effect's fail the check; the others
-  // are reported, and the page's own animation is wiremark/site#6.
+  // then (main pipeline 166056). The effect's fail the check; the others are
+  // reported, and the frame loops and animations behind them are asserted below.
   const owner = (task) => {
     const frames = longFrames.filter((f) => task.start < f.start + f.duration && f.start < task.start + task.duration);
     const scripts = frames.flatMap((f) => f.scripts);
@@ -235,11 +291,50 @@ async function idleWindow(page, label, failures, { report = false } = {}) {
   if (longTasks.length) failures.push(`${label}: ${longTasks.length} long task(s) of the effect while idle: ${JSON.stringify(longTasks)}; long animation frames: ${JSON.stringify(longFrames)}`);
   if (framesInWindow) failures.push(`${label}: ${framesInWindow} frame(s) drawn while nothing moved (rAF did not stop)`);
   if (running) failures.push(`${label}: ${running} effect(s) still running while idle`);
-  if (!report) await setPageAnimation(page, true);
-  return { windowMs: IDLE_WINDOW_MS, longTasks: report ? allLongTasks.length : longTasks.length, longTaskMs: (report ? allLongTasks : longTasks).map((e) => e.duration), pageLongTasks: report ? [] : pageLongTasks, browserLongTasks: report ? [] : browserLongTasks, framesInWindow, states: after.map((e) => e.state), longFrames };
+  // The page itself: no frame loop, motion only where it can be seen.
+  const loops = Object.entries(frameRequests).filter(([, n]) => n > FRAME_LOOP_LIMIT);
+  if (loops.length) failures.push(`${label}: frames requested in a loop while idle (more than ${FRAME_LOOP_LIMIT} in ${IDLE_WINDOW_MS} ms): ${JSON.stringify(Object.fromEntries(loops))}`);
+  const show = (rows) => JSON.stringify(rows.map((r) => r.name ? r.name + ' on ' + r.on : r.on));
+  const anims = census.animations;
+  const runningAnims = anims.filter((a) => a.state === 'running');
+  if (reducedMotion) {
+    if (runningAnims.length) failures.push(`${label}: ${runningAnims.length} infinite animation(s) run under reduced motion: ${show(runningAnims)}`);
+    const autoplaying = census.carousels.filter((c) => c.running);
+    if (autoplaying.length) failures.push(`${label}: ${autoplaying.length} carousel(s) autoplay under reduced motion: ${show(autoplaying)}`);
+  } else {
+    const offScreen = runningAnims.filter((a) => !a.inView);
+    if (offScreen.length) failures.push(`${label}: ${offScreen.length} infinite animation(s) run off screen: ${show(offScreen)}`);
+    const stopped = anims.filter((a) => a.inView && a.state !== 'running' && !a.cssPaused);
+    if (stopped.length) failures.push(`${label}: ${stopped.length} infinite animation(s) on screen do not run (the look changed): ${show(stopped)}`);
+    const offCarousels = census.carousels.filter((c) => c.running && !c.inView);
+    if (offCarousels.length) failures.push(`${label}: ${offCarousels.length} carousel(s) autoplay off screen: ${show(offCarousels)}`);
+    const stoppedCarousels = census.carousels.filter((c) => !c.running && c.inView);
+    if (stoppedCarousels.length) failures.push(`${label}: ${stoppedCarousels.length} carousel(s) on screen do not autoplay: ${show(stoppedCarousels)}`);
+  }
+  return {
+    windowMs: IDLE_WINDOW_MS,
+    allLongTasks: allLongTasks.length,
+    allLongTaskMs: allLongTasks.map((e) => e.duration),
+    longTasks: longTasks.length,
+    longTaskMs: longTasks.map((e) => e.duration),
+    pageLongTasks,
+    browserLongTasks,
+    framesInWindow,
+    frameRequests,
+    metrics,
+    animations: {
+      total: anims.length,
+      running: runningAnims.length,
+      runningOnScreen: runningAnims.filter((a) => a.inView).length,
+      pausedOffScreen: anims.filter((a) => !a.inView && a.state !== 'running').length,
+    },
+    carousels: census.carousels,
+    states: after.map((e) => e.state),
+    longFrames,
+  };
 }
 
-async function hover(page, index, failures, label) {
+async function hover(page, cdp, index, failures, label) {
   await scrollTo(page, index);
   await page.waitForTimeout(1000); // let a smooth scroller come to rest
   const box = await page.evaluate((i) => {
@@ -271,7 +366,7 @@ async function hover(page, index, failures, label) {
     [...document.querySelectorAll('.image-distortion')].every((el) => el.dataset.distortion !== 'running'),
     null, { timeout: HOVER_SETTLE_TIMEOUT_MS, polling: 250 }));
   const settleMs = Date.now() - t0;
-  const quiet = await idleWindow(page, `${label} after hover`, failures);
+  const quiet = await idleWindow(page, cdp, `${label} after hover`, failures);
   return { restarted, framesDuringHover: during.frames - before, settleMs, quiet };
 }
 
@@ -283,6 +378,8 @@ async function checkPage(browser, base, name) {
   {
     const context = await browser.newContext({ viewport: VIEWPORT });
     const page = await context.newPage();
+    const cdp = await context.newCDPSession(page);
+    await cdp.send('Performance.enable');
     const errors = [];
     page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`));
     page.on('console', (m) => { if (m.type() === 'error') errors.push(`console: ${m.text()}`); });
@@ -290,13 +387,12 @@ async function checkPage(browser, base, name) {
     const resp = await page.goto(base + name, { waitUntil: 'load', timeout: 60000 });
     if (!resp || resp.status() !== 200) failures.push(`${name}: HTTP ${resp ? resp.status() : 'no response'}`);
     await step('first frames after load', () => settled(page));
-    result.pageAnimation = await setPageAnimation(page, false);
-    await setPageAnimation(page, true);
+    result.idleMotion = await page.evaluate(() => document.documentElement.dataset.idleMotion || 'absent');
     result.webgl = await page.evaluate(() => {
       const gl = document.createElement('canvas').getContext('webgl');
       return gl ? gl.getParameter(gl.VERSION) : null;
     });
-    result.load = await idleWindow(page, `${name} after load`, failures);
+    result.load = await idleWindow(page, cdp, `${name} after load`, failures);
 
     const count = (await effects(page)).length;
     for (let i = 0; i < count; i++) await scrollTo(page, i);
@@ -316,12 +412,9 @@ async function checkPage(browser, base, name) {
         failures.push(`${name}: effect ${i} did not draw with WebGL (state ${e.state}, frames ${e.frames}, canvas ${e.canvas})`);
       }
     });
-    result.scrolled = await idleWindow(page, `${name} after scrolling every effect into view`, failures);
+    result.scrolled = await idleWindow(page, cdp, `${name} after scrolling every effect into view`, failures);
     // Hover the last effect: the scroll loop has just brought it to rest in view.
-    result.hover = await hover(page, count - 1, failures, `${name} hover`);
-    // Evidence only: the same window with the page's own animation running.
-    result.withCarousels = await idleWindow(page, `${name} with carousels`, failures, { report: true });
-    result.longTasksBeforeIdle = await page.evaluate(() => window.__longTasks.length);
+    result.hover = await hover(page, cdp, count - 1, failures, `${name} hover`);
     if (errors.length) failures.push(...errors.map((e) => `${name}: ${e}`));
     await context.close();
   }
@@ -331,10 +424,13 @@ async function checkPage(browser, base, name) {
     ['reduced-motion', 'static', (ctx) => ctx],
     ['no-webgl', 'fallback', async (ctx) => { await ctx.addInitScript(withoutWebGL); return ctx; }],
   ]) {
-    const context = await browser.newContext({ viewport: VIEWPORT, reducedMotion: mode === 'reduced-motion' ? 'reduce' : 'no-preference' });
+    const reducedMotion = mode === 'reduced-motion';
+    const context = await browser.newContext({ viewport: VIEWPORT, reducedMotion: reducedMotion ? 'reduce' : 'no-preference' });
     await setup(context);
     await context.addInitScript(recordLongTasks);
     const page = await context.newPage();
+    const cdp = await context.newCDPSession(page);
+    await cdp.send('Performance.enable');
     const errors = [];
     page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`));
     page.on('console', (m) => { if (m.type() === 'error') errors.push(`console: ${m.text()}`); });
@@ -347,10 +443,11 @@ async function checkPage(browser, base, name) {
         failures.push(`${name} ${mode}: effect ${i} is ${e.state}, canvas ${e.canvas}, background ${e.background}; want ${state}, no canvas, background image`);
       }
     });
-    if (errors.length) failures.push(...errors.map((e) => `${name} ${mode}: ${e}`));
     result[mode] = all.map((e) => e.state);
-    // Evidence only: long tasks of the page without the WebGL effect, page animation running.
-    result[mode + 'Idle'] = await idleWindow(page, `${name} ${mode}`, failures, { report: true });
+    // Evidence: right after scrolling, as pipeline 166007 measured it.
+    result[mode + 'Evidence'] = await idleWindow(page, cdp, `${name} ${mode} evidence`, failures, { report: true, reducedMotion });
+    result[mode + 'Idle'] = await idleWindow(page, cdp, `${name} ${mode} at rest`, failures, { reducedMotion });
+    if (errors.length) failures.push(...errors.map((e) => `${name} ${mode}: ${e}`));
     await context.close();
   }
 
@@ -379,17 +476,29 @@ const failures = results.flatMap((r) => r.failures);
 for (const r of results) {
   console.log(`${r.failures.length ? 'FAIL' : 'PASS'} ${r.page}`);
   if (r.webgl !== undefined) console.log(`  webgl: ${r.webgl}`);
-  const page = (w) => (w.pageLongTasks.length ? ` (+${w.pageLongTasks.length} long task(s) of other scripts: ${JSON.stringify(w.longFrames.filter((f) => f.scripts.length).flatMap((f) => f.scripts))})` : '')
-    + (w.browserLongTasks.length ? ` (+${w.browserLongTasks.length} long task(s) with no script: ${JSON.stringify(w.browserLongTasks.map((t) => t.duration))} ms)` : '');
-  if (r.load) console.log(`  after load:   ${r.load.windowMs} ms, ${r.load.longTasks} long tasks of the effect, ${r.load.framesInWindow} frames, states ${r.load.states.join(',')}${page(r.load)}`);
-  if (r.scrolled) console.log(`  after scroll: ${r.scrolled.windowMs} ms, ${r.scrolled.longTasks} long tasks of the effect, ${r.scrolled.framesInWindow} frames, frames drawn per effect ${r.effects.map((e) => e.frames).join(',')}${page(r.scrolled)}`);
-  if (r.hover) console.log(`  hover: restarted ${r.hover.restarted} (${r.hover.framesDuringHover} frames), settled in ${r.hover.settleMs} ms, then ${r.hover.quiet.longTasks} long tasks of the effect and ${r.hover.quiet.framesInWindow} frames in ${r.hover.quiet.windowMs} ms`);
-  if (r['reduced-motion']) console.log(`  reduced motion: ${r['reduced-motion'].join(',')}`);
-  if (r['no-webgl']) console.log(`  no WebGL: ${r['no-webgl'].join(',')}`);
-  if (r.pageAnimation) console.log(`  page animation paused during the idle windows above: ${r.pageAnimation.carousels} autoplay carousel(s), GSAP ticker ${r.pageAnimation.gsapTicker}, ${r.pageAnimation.cssAnimations} CSS/Web animation(s) at load`);
-  for (const [label, w] of [['evidence, WebGL, page animation running', r.withCarousels], ['evidence, no WebGL, page animation running', r['no-webglIdle']], ['evidence, reduced motion, page animation running', r['reduced-motionIdle']]]) {
-    if (w) console.log(`  ${label}: ${w.longTasks} long tasks ${JSON.stringify(w.longTaskMs)} and ${w.framesInWindow} effect frames in ${w.windowMs} ms`);
+  // One line per window: every long task (and whose), frame requests per
+  // script, style recalculations and layouts, and where motion runs.
+  const line = (label, w) => {
+    if (!w) return;
+    const requests = Object.entries(w.frameRequests).map(([k, n]) => k + ' ' + n).join(', ') || 'none';
+    const owners = w.allLongTasks ? ` (effect ${w.longTasks}, other scripts ${w.pageLongTasks.length}, no script ${w.browserLongTasks.length})` : '';
+    console.log(`  ${label}: ${w.allLongTasks} long tasks ${JSON.stringify(w.allLongTaskMs)}${owners} in ${w.windowMs} ms; ${w.metrics.recalcStyles} style recalcs, ${w.metrics.layouts} layouts, ${w.metrics.taskMs} ms main-thread work; frame requests: ${requests}; infinite animations ${w.animations.runningOnScreen} running on screen, ${w.animations.pausedOffScreen} paused off screen of ${w.animations.total}; carousels autoplaying ${w.carousels.filter((c) => c.running).length}/${w.carousels.length}; effect frames ${w.framesInWindow}`);
+    if (w.pageLongTasks.length) console.log(`    long animation frames of other scripts: ${JSON.stringify(w.longFrames.filter((f) => f.scripts.length && !f.scripts.some((s) => EFFECT_SCRIPT.test(s))).flatMap((f) => f.scripts))}`);
+  };
+  if (r.idleMotion) console.log(`  idle-motion: ${r.idleMotion}`);
+  line('after load', r.load);
+  if (r.effects) console.log(`  frames drawn per effect after scrolling: ${r.effects.map((e) => e.frames).join(',')}`);
+  line('after scroll', r.scrolled);
+  if (r.hover) {
+    console.log(`  hover: restarted ${r.hover.restarted} (${r.hover.framesDuringHover} frames), settled in ${r.hover.settleMs} ms`);
+    line('after hover', r.hover.quiet);
   }
+  if (r['reduced-motion']) console.log(`  reduced motion: ${r['reduced-motion'].join(',')}`);
+  line('reduced motion, right after scrolling (evidence)', r['reduced-motionEvidence']);
+  line('reduced motion, at rest', r['reduced-motionIdle']);
+  if (r['no-webgl']) console.log(`  no WebGL: ${r['no-webgl'].join(',')}`);
+  line('no WebGL, right after scrolling (evidence)', r['no-webglEvidence']);
+  line('no WebGL, at rest', r['no-webglIdle']);
   for (const f of r.failures) console.log(`  - ${f}`);
 }
 try {
@@ -403,5 +512,5 @@ if (failures.length) {
   console.log(`\ncheck-hero-idle: ${failures.length} failure(s)`);
   process.exitCode = 1;
 } else {
-  console.log('\ncheck-hero-idle: every effect drew, then the main thread stayed idle and rAF stopped');
+  console.log('\ncheck-hero-idle: every effect drew, then no script asked for frames in a loop, the effect stayed idle, and infinite animations and carousels ran on screen only');
 }
