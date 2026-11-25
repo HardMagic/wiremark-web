@@ -242,9 +242,16 @@ const cdpMetrics = async (cdp) => Object.fromEntries((await cdp.send('Performanc
 // report: evidence only, no grace and no assertions.
 async function idleWindow(page, cdp, label, failures, { report = false, reducedMotion = false } = {}) {
   if (report) failures = [];
-  // Let frames in flight, scroll-triggered work (ScrollTrigger's own
-  // requestAnimationFrame after a scroll) and the scroll smoother come to rest.
-  else await page.waitForTimeout(QUIET_GRACE_MS);
+  else {
+    // Let frames in flight, scroll-triggered work (ScrollTrigger's own
+    // requestAnimationFrame after a scroll) and the scroll smoother come to
+    // rest: idle-motion says when (data-idle-motion="rest"); a one-CPU
+    // software-GPU pod can need longer than the grace for the smoother to
+    // catch up after a jump (pipeline 170001).
+    await page.waitForTimeout(QUIET_GRACE_MS);
+    await step(`${label}: page at rest`, () => page.waitForFunction(() => document.documentElement.dataset.idleMotion !== 'awake',
+      null, { timeout: SETTLE_TIMEOUT_MS, polling: 100 }));
+  }
   const before = await effects(page);
   const t0 = await page.evaluate(() => performance.now());
   const m0 = await cdpMetrics(cdp);

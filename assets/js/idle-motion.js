@@ -206,11 +206,13 @@
             }
             resting = true;
             gsap.ticker.sleep();
+            document.documentElement.dataset.idleMotion = "rest";
         }
 
         function wake() {
             if (resting) {
                 resting = false;
+                document.documentElement.dataset.idleMotion = "awake";
                 gsap.ticker.wake();
                 if (parkedLoop) {
                     var loop = parkedLoop;
@@ -246,8 +248,12 @@
         };
         if (reduceMotion.addEventListener) reduceMotion.addEventListener("change", onMotionChange);
         else if (reduceMotion.addListener) reduceMotion.addListener(onMotionChange);
-        if (window.gsap && window.gsap.ticker && window.gsap.globalTimeline) restWhenIdle(window.gsap);
+        // data-idle-motion: "on" without GSAP; with it, "awake" or "rest" (ticker asleep).
         document.documentElement.dataset.idleMotion = "on";
+        if (window.gsap && window.gsap.ticker && window.gsap.globalTimeline) {
+            document.documentElement.dataset.idleMotion = "awake";
+            restWhenIdle(window.gsap);
+        }
     }
 
     // main.js builds the carousels on DOMContentLoaded; this file loads after
