@@ -5759,16 +5759,20 @@ span {
   text-transform: uppercase;
 }
 
+/* The marquees move with transform (compositor only) rather than left/right,
+   which laid the page out again on every frame (wiremark/site#6). The box is
+   200% of its container, so 50% of its own width is the container's width. */
 .marquee-inner.to-right {
+  right: 0;
   animation: marqueeRight 25s linear infinite;
 }
 
 @keyframes marqueeRight {
   0% {
-    right: 0;
+    transform: translateX(0);
   }
   100% {
-    right: -100%;
+    transform: translateX(50%);
   }
 }
 .marquee-inner {
@@ -5788,15 +5792,16 @@ span {
 }
 
 .marquee-inner.to-left {
+  left: 0;
   animation: marqueeLeft 25s linear infinite;
 }
 
 @keyframes marqueeLeft {
   0% {
-    left: 0;
+    transform: translateX(0);
   }
   100% {
-    left: -100%;
+    transform: translateX(-50%);
   }
 }
 .gt-what-can-box-items {

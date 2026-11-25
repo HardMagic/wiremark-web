@@ -42,8 +42,10 @@ public-surface:
     - sh scripts/build-site.sh _site
     - node scripts/check-public-surface.mjs _site
 
-# Hero idle check (wiremark/site#5): the .image-distortion WebGL hover effect
-# draws on demand and leaves the main thread idle. On index-2 and index-3, in
+# Hero idle check (wiremark/site#5, #6): the .image-distortion WebGL hover
+# effect draws on demand and leaves the main thread idle, and the page's own
+# animation (assets/js/idle-motion.js) asks for no frame loop at rest and runs
+# only on screen, never under reduced motion; nothing is paused for the check. On index-2 and index-3, in
 # headless Chromium with software WebGL (the GPU the wiremark/qa Lighthouse and
 # Lost Pixel jobs get): no long task and no frame drawn once every effect has
 # drawn, the rAF loop restarts on pointer movement and stops when the flow has

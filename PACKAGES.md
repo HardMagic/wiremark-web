@@ -101,6 +101,23 @@ Then update the set above in this file, and check the new icon renders on its pa
 | `distortion-img-depend.js` | Runtime dependency of the live `distortion-img.js` ES module (WebGL image-distortion on `.image-distortion`). Since wiremark/site#5 `distortion-img.js` draws on demand: once when the image loads, then only while the flow settles after pointer movement; it starts near the viewport, pauses off screen, uses a 128 Flowmap (OGL default) and shows the plain background with `prefers-reduced-motion` or without WebGL. `scripts/check-hero-idle.mjs` proves it in CI (`hero-idle`). |
 | `main.css.map` | Sourcemap for `main.css`; harmless. |
 
+## First-party idle motion (`assets/js/idle-motion.js`)
+
+No new dependency: a small vanilla script, loaded right after `main.js` by every page, that lets a page stop
+producing frames when nothing on it moves (wiremark/site#6). It works around three behaviours of the vendored
+packages above without patching them, so upgrading them stays a file swap:
+
+| Package behaviour | What idle-motion does |
+|---|---|
+| Infinite CSS keyframes (`cir36`, marquees, `bounce-x`, `float-bob`, `ShapeAnim`, `scroll`) run whether or not they can be seen. | Pauses each one while its element is off screen (IntersectionObserver, `Animation.pause()`/`play()`), and all of them, on their first frame, under `prefers-reduced-motion`. On screen with motion allowed nothing changes. The marquees in `main.css` move with `transform` rather than `left`/`right`, which laid out the page every frame. |
+| **Swiper 14** autoplay keeps a `requestAnimationFrame` loop running for as long as it plays, only to emit `autoplayTimeLeft` (unused here). | Stops Swiper's autoplay and advances the carousel on a timer instead (same `delay` or slide `data-swiper-autoplay`, `slideNext()` at the configured `speed`, restarted after every slide change), only while the carousel is on screen and not under reduced motion. The carousel shows `data-idle-autoplay="on\|off"`. |
+| **ScrollTrigger 3.15** starts `_rafBugFix`, a `requestAnimationFrame` that re-requests itself for the life of the page (a Firefox repaint workaround); only `ScrollTrigger.disable()`, which undoes every trigger, stops it. GSAP's ticker also ticks while anything is scheduled. | When the scroll has been at rest for 800 ms and no top-level GSAP animation is running or waiting, puts `gsap.ticker` to sleep and parks `_rafBugFix` (it wraps `window.requestAnimationFrame` and holds only the callback of that name). Scroll, wheel, touch, pointer-down, keys and resize wake both; GSAP wakes its ticker itself for any new tween. |
+
+`scripts/check-hero-idle.mjs` (CI job `hero-idle`) proves it on index-2 and index-3 without pausing anything
+itself: in every idle window no callback asks for frames in a loop, off-screen infinite animations and carousels are
+paused, on-screen ones run, and under reduced motion none run. **After upgrading GSAP or Swiper**, read that job:
+a renamed `_rafBugFix` or a new autoplay API shows there as a frame loop or a carousel that does not move.
+
 ## Notes for the copywriter
 
 - All icon markup renders from the Font Awesome Free set — no Pro-only glyphs.
