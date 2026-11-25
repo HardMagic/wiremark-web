@@ -55,7 +55,7 @@ hero-idle:
   needs: []
   interruptible: true
   # renovate: datasource=docker depName=mcr.microsoft.com/playwright
-  image: harbor.focuscell.org/mcr-proxy/playwright:v1.64.1-noble@sha256:2f05f8a734509a7b3f26a912639488ee08f58a7b292d14d62271bcff9038768f
+  image: harbor.focuscell.org/mcr-proxy/playwright:v1.65.1-noble@sha256:1507cbfc550a63a6b7396791ca4f00df17beb56342d2447b3f106c306f525579
   variables:
     npm_config_cache: "$CI_PROJECT_DIR/.npm-cache"
     KUBERNETES_CPU_REQUEST: "1"
